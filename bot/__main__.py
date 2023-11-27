@@ -1,21 +1,16 @@
 import asyncio
 
-from bot import AlexisBot
 
+async def run():
+    from .bot import AlexisBot
 
-def run():
-    ale = None
-
-    try:
-        ale = AlexisBot()
-        with ale:
-            ale.init()
-    except asyncio.CancelledError:
-        pass
-    except Exception:
-        ale.manager.close_http()
-        raise
+    bot = AlexisBot.instance()
+    async with bot:
+        try:
+            await bot.init()
+        except asyncio.CancelledError:
+            pass
 
 
 if __name__ == '__main__':
-    run()
+    asyncio.run(run())

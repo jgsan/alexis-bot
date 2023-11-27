@@ -1,3 +1,4 @@
+from typing import Self
 import asyncio
 import platform
 import sys
@@ -5,7 +6,8 @@ from datetime import datetime
 
 import discord
 
-from bot import Language, Manager, constants
+from bot import Language, constants
+from bot.manager import Manager
 from bot.lib.guild_configuration import GuildConfiguration
 from bot.database import BotDatabase
 from bot.lib.configuration import BotConfiguration
@@ -142,9 +144,6 @@ class AlexisBot(discord.Client):
         log.debug('Closing stuff...')
         await super().close()
 
-        # Close everything http related
-        self.manager.close_http()
-
         # Stop tasks
         self.manager.cancel_tasks()
 
@@ -238,3 +237,11 @@ class AlexisBot(discord.Client):
     @property
     def uptime(self):
         return datetime.now() - self.start_time
+
+
+    _instance = None
+    @classmethod
+    def instance(cls) -> Self:
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance

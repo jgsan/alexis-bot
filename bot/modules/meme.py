@@ -59,8 +59,8 @@ class Meme(Command):
         lower = args[0] if len(args) == 1 else args[1]
 
         await cmd.typing()
-        self.log.debug('Downloading user avatar: %s', str(user.avatar_url))
-        avatar_data = await user.avatar_url.read()
+        self.log.debug('Downloading user avatar: %s', str(user.avatar.url))
+        avatar_data = await user.avatar.read()
 
         avatar_data = Image.open(BytesIO(avatar_data)).resize((self.isize, self.isize), Image.LANCZOS)
         im = Image.new('RGBA', (self.isize, self.isize))

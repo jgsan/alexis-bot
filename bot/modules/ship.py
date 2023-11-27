@@ -2,7 +2,7 @@ from io import BytesIO
 from PIL import Image
 from discord import File
 
-from bot import Command, categories
+from bot import Command, CommandEvent, categories
 from bot.utils import parse_tag, download
 
 heart_url = 'https://i.imgur.com/80c3IKZ.png'
@@ -84,11 +84,11 @@ class ShipperUwU(Command):
         await cmd.channel.send(msg, file=File(temp, filename='ship.png'))
 
 
-async def get_details(cmd, text):
+async def get_details(cmd: CommandEvent, text: str):
     item = parse_tag(text)
     if item is None or item['type'] == 'user':
         user = cmd.get_member(text) if item is None else cmd.get_member(item['id'])
-        return None if user is None else (user.display_name, str(user.avatar_url))
+        return None if user is None else (user.display_name, str(user.avatar.url))
     elif item['type'] == 'emoji':
         url = 'https://discordapp.com/api/emojis/{}.{}'
         return item['name'], url.format(item['id'], 'gif' if item['animated'] else 'png')

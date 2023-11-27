@@ -87,7 +87,6 @@ class AutoRole(Command):
             msg = await cmd.answer('$[autorole-assigning]')
 
             total = len(cmd.guild.members)
-            loop = asyncio.get_event_loop()
             i = 0
 
             async def upd():
@@ -95,9 +94,9 @@ class AutoRole(Command):
 
                 if i < total:
                     await asyncio.sleep(3)
-                    await loop.create_task(upd())
+                    await asyncio.run(upd())
 
-            await loop.create_task(upd())
+            await asyncio.run(upd())
 
             for member in list(cmd.guild.members):
                 await self.give_roles(member)
@@ -112,7 +111,6 @@ class AutoRole(Command):
             msg = await cmd.answer('$[autorole-removing]')
 
             total = len(cmd.guild.members)
-            loop = asyncio.get_event_loop()
             i = 0
 
             async def upd():
@@ -120,9 +118,9 @@ class AutoRole(Command):
 
                 if i < total:
                     await asyncio.sleep(3)
-                    await loop.create_task(upd())
+                    await asyncio.run(upd())
 
-            await loop.create_task(upd())
+            await asyncio.run(upd())
 
             for member in list(cmd.guild.members):
                 await self.take_roles(member)

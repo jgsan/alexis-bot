@@ -49,7 +49,7 @@ class MessageEvent:
             if withname:
                 content.set_footer(
                     text=self.lang.format('$[answer-for]', locales={'author': self.author_name}),
-                    icon_url=self.author.avatar_url_as(format='webp', size=32)
+                    icon_url=self.author.avatar.with_size(32).with_format('webp')
                 )
             kwargs['embed'] = content
             content = ''

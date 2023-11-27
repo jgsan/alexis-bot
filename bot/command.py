@@ -1,9 +1,12 @@
+from logging import Logger
 import aiohttp
 import asyncio
+
 import discord
 
-from bot import AlexisBot
+from bot import CommandEvent
 from . import SingleLanguage, categories
+from .bot import AlexisBot
 from .utils import lazy_property
 from .lib.guild_configuration import GuildConfiguration
 from .logger import new_logger
@@ -12,7 +15,6 @@ from .logger import new_logger
 class Command:
     __author__ = 'makzk'
     __version__ = '0.0.0'
-    system = False
     db_models = []
 
     def __init__(self, bot: AlexisBot):
@@ -43,7 +45,7 @@ class Command:
         self.user_delay_error = '$[command-delayed]'
         self.nsfw_only_error = '$[nsfw-only]'
 
-    def handle(self, cmd):
+    def handle(self, cmd: CommandEvent):
         raise AssertionError('handle method not implemented')
 
     def get_lang(self, guild=None, channel=None):
@@ -82,9 +84,9 @@ class Command:
             self.bot.__class__.name, self.bot.__class__.__version__)}
 
         return aiohttp.ClientSession(
-            loop=asyncio.get_event_loop(), headers=headers, cookie_jar=aiohttp.CookieJar(unsafe=True)
+            headers=headers, cookie_jar=aiohttp.CookieJar(unsafe=True)
         )
 
     @lazy_property
-    def log(self):
+    def log(self) -> Logger:
         return new_logger(self.__class__.__name__)

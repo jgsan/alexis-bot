@@ -32,7 +32,8 @@ class Language:
                 continue
 
             with codecs.open(lang_file, 'r', encoding='utf8') as f:
-                yml = yaml.safe_load(f)
+                yml = yaml.YAML(typ='safe')
+                yml.load(f)
                 lang = fn[:-4]
 
                 if not isinstance(yml, dict):

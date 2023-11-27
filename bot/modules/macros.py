@@ -4,7 +4,7 @@ from datetime import datetime
 import peewee
 from discord import Embed, Colour
 
-from bot import Command, categories, BaseModel
+from bot import Command, CommandEvent, categories, BaseModel
 from bot.utils import is_int, get_colour, format_date, colour_list
 
 pat_macro_name = re.compile(r'^[\w\-.,$%&¿?¡!+]{3,50}')

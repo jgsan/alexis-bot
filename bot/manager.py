@@ -5,7 +5,6 @@ import inspect
 import aiohttp
 
 from bot.logger import new_logger
-from .command import Command
 
 from bot import modules
 from .lib.common import is_pm
@@ -147,18 +146,6 @@ class Manager:
                 await task()
             except Exception as e:
                 log.exception(e)
-            finally:
-                if time == 0:
-                    log.debug('Run-once task finished: %s', repr(task))
-                    break
-                if self.bot.loop.is_closed():
-                    log.debug('Bot stopped before running, task not running anymore: %s', repr(task))
-                    break
-                await asyncio.sleep(time)
-                if self.bot.loop.is_closed():
-                    log.debug('Bot stopped, task not running anymore: %s', repr(task))
-                    break
-
     def schedule(self, task, time=0, force=False):
         """
         Adds a task to the loop to be run every *time* seconds.
@@ -285,18 +272,6 @@ class Manager:
             del self.tasks[task_name]
         log.debug('All tasks cancelled.')
 
-    def close_http(self):
-        loop = asyncio.get_event_loop()
-        loop.create_task(self.close_http_async())
-
-    async def close_http_async(self):
-        for i in self.cmd_instances:
-            await i.http.close()
-
-        await self.http.close()
-        await self.bot.http.close()
-        log.debug('HTTP sessions closed.')
-
     def __getitem__(self, item):
         return self.get_cmd(item)
 
@@ -305,15 +280,15 @@ class Manager:
 
     @staticmethod
     def get_mods():
+        from .command import Command
         classes = []
+
         for imod in modules:
             try:
                 members = inspect.getmembers(importlib.import_module(imod))
                 for name, clz in members:
                     if name == 'Command' or not inspect.isclass(clz) or not issubclass(clz, Command):
                         continue
-                    if imod.startswith('bot.'):
-                        clz.system = True
                     classes.append(clz)
             except ImportError as e:
                 log.error('Could not load a module')

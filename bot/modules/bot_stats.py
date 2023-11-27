@@ -2,7 +2,7 @@ import platform
 
 import discord
 
-from bot import AlexisBot, Command, categories, constants
+from bot import Command, categories, constants
 from bot.utils import deltatime_to_time
 
 
@@ -46,7 +46,7 @@ class InfoCmd(Command):
         self.category = categories.INFORMATION
 
     async def handle(self, cmd):
-        info_msg = f'**{AlexisBot.name}** $[info-version]: {AlexisBot.__version__}\n' \
+        info_msg = f'**{self.bot.name}** $[info-version]: {self.bot.__version__}\n' \
                    f'{constants.REPOSITORY_URL}\n\n$[info-invite]'
 
         invite_link = 'https://discord.com/oauth2/authorize?client_id={}&scope=bot'.format(self.bot.user.id)

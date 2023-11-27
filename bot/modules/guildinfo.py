@@ -1,7 +1,7 @@
 from discord import Embed
 from discord.utils import utcnow
 
-from bot import AlexisBot, Command, CommandEvent, categories
+from bot import Command, categories
 from bot.utils import format_date, deltatime_to_str, auto_int
 
 
@@ -9,14 +9,14 @@ class GuildInfo(Command):
     __version__ = '1.1.3'
     __author__ = 'makzk'
 
-    def __init__(self, bot: AlexisBot):
+    def __init__(self, bot):
         super().__init__(bot)
         self.name = 'guildinfo'
         self.aliases = ['guild', 'server', 'serverinfo']
         self.format = '$[guildinfo-format]'
         self.category = categories.INFORMATION
 
-    async def handle(self, cmd: CommandEvent):
+    async def handle(self, cmd):
         if cmd.argc == 0:
             if cmd.is_pm:
                 return await cmd.send_usage()
@@ -62,7 +62,7 @@ class GuildInfo(Command):
         if len(other) > 0:
             cont += '\n\n**Otros**: {}'.format(', '.join(other))
 
-        embed.set_thumbnail(url=guild.icon_url)
+        embed.set_thumbnail(url=guild.icon.url)
         embed.description = cont
         embed.set_footer(text='$[answer-for]')
 

@@ -1,10 +1,10 @@
 import re
 from datetime import datetime
 
-import discord
 import peewee
 import emoji
-from discord import Emoji, Embed
+from discord import Emoji, Embed, Member, Message, Reaction
+from discord.utils import utcnow
 
 from bot import Command, categories, BaseModel
 from bot.lib.guild_configuration import GuildConfiguration
@@ -120,7 +120,7 @@ class StarboardHook(Command):
         else:
             await cmd.answer('$[starboard-format]', locales={'command_name': cmd.cmdname})
 
-    async def on_reaction_add(self, reaction, user: discord.Member):
+    async def on_reaction_add(self, reaction: Reaction, user: Member):
         message = reaction.message
         config = GuildConfiguration.get_instance(user.guild)
 
@@ -202,16 +202,16 @@ class StarboardHook(Command):
             new_embed = self.create_embed(message, star_item.timestamp, footer_text)
             await starboard_msg.edit(embed=new_embed)
         else:
-            timestamp = datetime.now()
+            timestamp = utcnow()
             embed = self.create_embed(message, timestamp, footer_text)
             starboard_msg = await starboard_chan.send(embed=embed)
             Starboard.insert(
                 message_id=message.id, timestamp=timestamp, starboard_id=starboard_msg.id).execute()
 
-    def create_embed(self, msg, ts, footer_txt):
+    def create_embed(self, msg: Message, ts: datetime, footer_txt: str):
         embed = Embed()
         title = '{} - #{}'.format(msg.author.display_name, msg.channel.name)
-        embed.set_author(name=title, icon_url=msg.author.avatar_url)
+        embed.set_author(name=title, icon_url=msg.author.avatar.url)
         embed.description = msg.content
         embed.set_footer(text=str(ts))
 

@@ -6,7 +6,6 @@ from discord import Embed, AuditLogAction
 
 from bot.regex import pat_channel
 from bot.utils import deltatime_to_str
-from modules.user import UserInfo
 
 modlog_types = ['user_join', 'user_leave', 'message_delete', 'username', 'nick', 'invite_filter', 'message_edit']
 
@@ -17,6 +16,8 @@ class ModLog(Command):
     chan_config_name = 'join_send_channel'
 
     async def on_member_join(self, member):
+        from bot.modules.user import UserInfo
+
         await self.bot.send_modlog(
             member.guild, '$[modlog-new-user]',
             embed=UserInfo.gen_embed(member, more=True), locales={'mid': member.id}, logtype='user_join')
@@ -30,7 +31,7 @@ class ModLog(Command):
 
         await self.bot.send_modlog(member.guild, '$[modlog-user-left]', locales=locales, logtype='user_leave')
 
-    async def on_message_delete(self, message):
+    async def on_message_delete(self, message: discord.Message):
         if message.guild is None or message.author.id == self.bot.user.id:
             return
 
@@ -181,9 +182,9 @@ class ModLog(Command):
                 else:
                     await self.bot.send_modlog(guild, '$[modlog-nick-by]', logtype='nick', locales=locales)
 
-    async def get_last_alog(self, guild):
+    async def get_last_alog(self, guild: discord.Guild):
         try:
-            entries = await guild.audit_logs(limit=1).flatten()
+            entries = (await guild.audit_logs(limit=1)).flatten()
         except discord.Forbidden:
             return None
         except AttributeError:

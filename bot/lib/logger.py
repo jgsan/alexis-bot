@@ -1,12 +1,13 @@
 import datetime
 import logging
+from logging import Logger
 import os
 from os import path
 
 from bot.defaults import default_log_format, datetime_format, filename_format
 
 
-def create_logger(name, log_format=default_log_format, log_path=None, logtime=None):
+def create_logger(name, log_format=default_log_format, log_path=None, logtime=None) -> Logger:
     log = logging.getLogger(name)
     if len(log.handlers) > 1:
         return log
