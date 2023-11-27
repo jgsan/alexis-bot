@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 import discord
 
+from bot import AlexisBot
 from . import SingleLanguage, categories
 from .utils import lazy_property
 from .lib.guild_configuration import GuildConfiguration
@@ -14,7 +15,7 @@ class Command:
     system = False
     db_models = []
 
-    def __init__(self, bot):
+    def __init__(self, bot: AlexisBot):
         self.bot = bot
         self.mgr = bot.manager
         self.name = ''  # Command name
@@ -64,7 +65,7 @@ class Command:
                 lang_code = guildcfg.get('lang#' + chanid, lang_code)
 
         return SingleLanguage(self.bot.lang, lang_code)
-    
+
     @classmethod
     def user_optout(cls, user):
         from .modules.userlog_optout import UserLogOptOut

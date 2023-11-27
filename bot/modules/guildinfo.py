@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from discord import Embed
+from discord.utils import utcnow
 
-from bot import Command, categories
+from bot import AlexisBot, Command, CommandEvent, categories
 from bot.utils import format_date, deltatime_to_str, auto_int
 
 
@@ -10,14 +9,14 @@ class GuildInfo(Command):
     __version__ = '1.1.3'
     __author__ = 'makzk'
 
-    def __init__(self, bot):
+    def __init__(self, bot: AlexisBot):
         super().__init__(bot)
         self.name = 'guildinfo'
         self.aliases = ['guild', 'server', 'serverinfo']
         self.format = '$[guildinfo-format]'
         self.category = categories.INFORMATION
 
-    async def handle(self, cmd):
+    async def handle(self, cmd: CommandEvent):
         if cmd.argc == 0:
             if cmd.is_pm:
                 return await cmd.send_usage()
@@ -35,7 +34,7 @@ class GuildInfo(Command):
             await cmd.answer('$[guildinfo-not-found]')
             return
 
-        created_diff = deltatime_to_str(datetime.now() - guild.created_at)
+        created_diff = deltatime_to_str(utcnow() - guild.created_at)
         bot_count = len([m for m in guild.members if m.bot])
         bot_word = cmd.lang.get('guildinfo-bot' + ['s', ''][bot_count == 0])
         emoji_word = cmd.lang.get('guildinfo-emoji' + ['s', ''][len(guild.emojis) == 0])

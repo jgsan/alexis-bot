@@ -139,7 +139,7 @@ def parse_tag(text):
     user = pat_usertag.match(text)
     if user is not None:
         return {'type': 'user', 'id': int(user.group(1)), 'with_nick': text.startswith('<@!')}
-    
+
     return None
 
 
@@ -242,16 +242,11 @@ def timediff_parse(timediff):
 
 def format_date(date):
     """
-    Creates a date string given a date object, in the format YYYY-mm-dd HH:MM:SS [offset].
-    The offset will normally be in the -NNNN format (e.g., -0300).
+    Creates a date string given a date object, in the format YYYY-mm-dd HH:MM:SS.
     :param date: The date object
     :return: The generated string for the date object.
     """
-    offset = time.strftime('%Z')
-    if len(offset) > 5:
-        offset = time.strftime('%z')
-
-    return date.strftime('%Y-%m-%d %H:%M:%S ') + offset
+    return date.strftime('%Y-%m-%d %H:%M:%S')
 
 
 def replace_everywhere(content, search, replace=None):

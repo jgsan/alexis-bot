@@ -1,10 +1,7 @@
-from datetime import datetime
-
 import discord
-import peewee
-from discord.utils import escape_markdown
+from discord.utils import escape_markdown, utcnow
 
-from bot import Command, utils, categories, BaseModel
+from bot import Command, utils, categories
 from discord import Embed, AuditLogAction
 
 from bot.regex import pat_channel
@@ -25,11 +22,10 @@ class ModLog(Command):
             embed=UserInfo.gen_embed(member, more=True), locales={'mid': member.id}, logtype='user_join')
 
     async def on_member_remove(self, member):
-        dt = deltatime_to_str(datetime.now() - member.joined_at)
         locales = {
             'mid': member.id,
             'username': escape_markdown(str(member)),
-            'dt': dt
+            'dt': deltatime_to_str(utcnow() - member.joined_at)
         }
 
         await self.bot.send_modlog(member.guild, '$[modlog-user-left]', locales=locales, logtype='user_leave')
@@ -37,7 +33,7 @@ class ModLog(Command):
     async def on_message_delete(self, message):
         if message.guild is None or message.author.id == self.bot.user.id:
             return
-        
+
         if self.user_optout(message.author):
             return
 
@@ -100,7 +96,7 @@ class ModLog(Command):
         # Ignore if no content changes were made
         if before.content.strip() == after.content.strip():
             return
-        
+
         # Ignore if user opted-out from being logged
         if self.user_optout(before.author):
             return

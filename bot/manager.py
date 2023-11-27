@@ -7,11 +7,10 @@ import aiohttp
 from bot.logger import new_logger
 from .command import Command
 
-import modules as bot_modules
-from bot import modules as sys_modules
+from bot import modules
 from .lib.common import is_pm
 
-modules = ['modules.' + x for x in bot_modules.__all__] + ['bot.modules.' + x for x in sys_modules.__all__]
+modules = ['bot.modules.' + x for x in modules.__all__]
 log = new_logger('Manager')
 
 

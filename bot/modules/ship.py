@@ -60,8 +60,8 @@ class ShipperUwU(Command):
             user2_avatar = await resp.read()
 
         # Open and resize pictures
-        user1_img = Image.open(BytesIO(user1_avatar)).resize((512, 512), Image.ANTIALIAS)
-        user2_img = Image.open(BytesIO(user2_avatar)).resize((512, 512), Image.ANTIALIAS)
+        user1_img = Image.open(BytesIO(user1_avatar)).resize((512, 512), Image.LANCZOS)
+        user2_img = Image.open(BytesIO(user2_avatar)).resize((512, 512), Image.LANCZOS)
 
         # Open the heart <3
         heart_img = Image.open(self.heart_path)

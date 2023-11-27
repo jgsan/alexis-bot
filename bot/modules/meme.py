@@ -62,7 +62,7 @@ class Meme(Command):
         self.log.debug('Downloading user avatar: %s', str(user.avatar_url))
         avatar_data = await user.avatar_url.read()
 
-        avatar_data = Image.open(BytesIO(avatar_data)).resize((self.isize, self.isize), Image.ANTIALIAS)
+        avatar_data = Image.open(BytesIO(avatar_data)).resize((self.isize, self.isize), Image.LANCZOS)
         im = Image.new('RGBA', (self.isize, self.isize))
         im.paste(avatar_data, (0, 0))
 
@@ -79,37 +79,37 @@ class Meme(Command):
 
     def meme_draw(self, im, text, upper=True):
         draw = ImageDraw.Draw(im)
-        selfont = self.font
         sep = int(self.isize / 23)
 
-        # Determine font size
-        if len(self.text_splitter(draw, text, self.isize - sep, selfont)) > 2:
-            selfont = self.font_smaller
+        use_smaller = len(self.text_splitter(draw, text, self.isize - sep)) > 2
+        draw.font = self.font_smaller if use_smaller else self.font
 
         # Determine text position
-        text = '\n'.join(self.text_splitter(draw, text, self.isize - sep, selfont))
-        w, h = draw.multiline_textsize(text, selfont)
-        xy = (int(self.isize/2)) - int(w/2), (15 if upper else self.isize - sep - h)
+        text = '\n'.join(self.text_splitter(draw, text, self.isize - sep))
+        height = draw.multiline_textbbox((0,0), text)[3]
+        width = draw.textlength(text)
+
+        xy = (int(self.isize/2)) - int(width/2), (15 if upper else self.isize - sep - height)
 
         # Draw shadow
         i = 2
         x, y = xy
-        draw.multiline_text((x+i, y+i), text, font=selfont, align='center', fill='black')
-        draw.multiline_text((x+i, y-i), text, font=selfont, align='center', fill='black')
-        draw.multiline_text((x-i, y-i), text, font=selfont, align='center', fill='black')
-        draw.multiline_text((x-i, y+i), text, font=selfont, align='center', fill='black')
+        draw.multiline_text((x+i, y+i), text, align='center', fill='black')
+        draw.multiline_text((x+i, y-i), text, align='center', fill='black')
+        draw.multiline_text((x-i, y-i), text, align='center', fill='black')
+        draw.multiline_text((x-i, y+i), text, align='center', fill='black')
 
         # Draw text itself
-        draw.multiline_text(xy, text, font=selfont, align='center')
+        draw.multiline_text(xy, text, align='center')
 
-    def text_splitter(self, draw, text, max_width, font):
+    def text_splitter(self, draw: ImageDraw, text: str, max_width: int, font=None):
         lines = []
         words = [f.strip() for f in text.split(' ')]
 
         line = []
         for word in words:
-            w, h = draw.multiline_textsize(' '.join(line) + word, font)
-            if w > max_width and len(line) > 0:
+            width = draw.multiline_textbbox((0, 0), ' '.join(line) + word)[2]
+            if width > max_width and len(line) > 0:
                 lines.append(' '.join(line))
                 line = [word]
             else:

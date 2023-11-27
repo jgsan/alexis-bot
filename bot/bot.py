@@ -58,7 +58,7 @@ class AlexisBot(discord.Client):
             event = 'on_' + method
             setattr(self, event, make_handler(event, margs.copy()))
 
-    def init(self):
+    async def init(self):
         """
         Loads configuration, connects to database, and then connects to Discord.
         """
@@ -90,15 +90,10 @@ class AlexisBot(discord.Client):
             self.start_time = datetime.now()
             chunking_info = ' (load guild chunks enabled!)' if config.get('chunk_guilds') else ''
             log.info('Connecting to Discord{}...'.format(chunking_info))
-            self.loop.run_until_complete(self.start(self.config['token']))
+            await self.start(self.config['token'])
         except discord.errors.LoginFailure:
             log.error('Invalid Discord token!')
             raise
-        except KeyboardInterrupt:
-            self.loop.run_until_complete(self.close())
-            log.warning('Keyboard interrupt!')
-        finally:
-            self.loop.close()
 
     async def on_ready(self):
         """ This is executed once the bot has successfully connected to Discord. """
