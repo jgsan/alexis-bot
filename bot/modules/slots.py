@@ -1,4 +1,5 @@
-from bot import Command, Configuration, categories
+from bot import Command, categories
+from bot.lib.common import yaml_config
 from discord import Embed
 import random
 
@@ -20,7 +21,7 @@ class Slots(Command):
         self.owner_only = False
         self.enabled = True
         self.category = categories.FUN
-        self.config = Configuration.get_config('slots', defaults)
+        self.config = yaml_config('slots', defaults)
 
     async def handle(self, cmd):
         frutas = self.config['slots_fruits']

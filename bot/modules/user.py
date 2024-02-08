@@ -1,12 +1,10 @@
-from datetime import datetime
-
 import discord
 from discord import Embed
 from discord.utils import escape_markdown, utcnow
 
-from bot import Command, categories, utils
+from bot import Command, categories, utils, settings
 from bot.utils import deltatime_to_str
-from modules.usernote import UserNoteCmd
+from bot.modules.usernote import UserNoteCmd
 
 
 class UserInfo(Command):
@@ -16,7 +14,7 @@ class UserInfo(Command):
     def __init__(self, bot):
         super().__init__(bot)
         self.name = 'user'
-        self.aliases = [bot.config['command_prefix'] + 'user']
+        self.aliases = [settings.command_prefix + 'user']
         self.help = '$[modlog-cmd-help]'
         self.category = categories.INFORMATION
 

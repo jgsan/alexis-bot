@@ -3,7 +3,7 @@ import re
 import codecs
 
 from os import path
-from ruamel import yaml
+from ruamel.yaml import YAML
 from discord import Embed
 
 from bot.logger import new_logger
@@ -32,7 +32,7 @@ class Language:
                 continue
 
             with codecs.open(lang_file, 'r', encoding='utf8') as f:
-                yml = yaml.YAML(typ='safe')
+                yml = YAML(typ='safe')
                 yml.load(f)
                 lang = fn[:-4]
 

@@ -1,4 +1,4 @@
-from bot import Command, categories
+from bot import Command, categories, settings
 import urllib.parse as urlparse
 from discord import Embed
 
@@ -19,11 +19,11 @@ class Weather(Command):
         self.enabled = True
 
     def on_loaded(self):
-        if self.bot.config['weatherapi_key'] == '':
+        if settings.weatherapi_key == '':
             self.log.warn('Weather API key not set. Add the \'weatherapi_key\' to the settings.')
 
     async def handle(self, cmd):
-        if self.bot.config['weatherapi_key'] == '':
+        if settings.weatherapi_key == '':
             await cmd.answer('$[weather-error-not-set]')
             return
 
@@ -33,7 +33,7 @@ class Weather(Command):
 
         place = urlparse.quote(cmd.text)
         lang = cmd.lang.lang[0:2]
-        url = '{}{}&units=metric&lang={}&APPID={}'.format(self.urlbase, place, lang, self.bot.config['weatherapi_key'])
+        url = '{}{}&units=metric&lang={}&APPID={}'.format(self.urlbase, place, lang, settings.weatherapi_key)
         self.log.debug('Loading ' + url)
 
         await cmd.typing()

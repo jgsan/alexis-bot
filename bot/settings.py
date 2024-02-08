@@ -1,5 +1,10 @@
 from os import getenv
+import pathlib
+from dotenv import load_dotenv
 
+load_dotenv()
+
+base_dir = pathlib.Path(__file__).parent.parent
 debug = getenv('DEBUG', '') == '1'
 database_url = getenv('DATABASE_URL', 'sqlite:///database.db')
 discord_token = getenv('DISCORD_TOKEN')
@@ -20,6 +25,8 @@ allowlist_servers = getenv('ALLOWLIST_SERVERS', '').split(',')
 allowlist_autoleave = getenv('ALLOWLIST_AUTOLEAVE', '1') == '1'
 allowlist_contact = getenv('ALLOWLIST_CONTACT', bot_owners[0])
 blocklist_servers = getenv('BLOCKLIST_SERVERS', '').split(',')
+
+weatherapi_key = ''
 
 try:
     from local_settings import *  # pyright: ignore[reportMissingImports]

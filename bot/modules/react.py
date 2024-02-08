@@ -1,5 +1,5 @@
 import discord
-from bot.lib.configuration import yaml
+from ruamel.yaml import YAML
 
 from bot import Command
 from bot.regex import pat_channel, pat_snowflake
@@ -85,6 +85,7 @@ class React(Command):
         ins.log.debug('Loading reaction characters...')
         async with ins.http.get(reacts_url) as r:
             global letters
+            yaml = YAML(typ='safe')
             letters = yaml.load(await r.text())
             ins.log.debug('Reaction characters loaded!')
 

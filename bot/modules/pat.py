@@ -1,7 +1,9 @@
 import random
-from bot.lib.configuration import yaml
-from bot import Command, Configuration, categories
+from ruamel.yaml import YAML
+
+from bot import Command, categories
 from bot.utils import img_embed
+from bot.lib.common import yaml_config
 
 default_pats = 'https://l.owo.cl/default_pats'
 
@@ -46,10 +48,13 @@ class Pat(Command):
 
     async def on_ready(self):
         self.log.debug('Loading pats...')
-        if not Configuration.exists('pats'):
+        config = yaml_config('pats')
+
+        if not config:
             self.log.debug('Loading remote default pats')
             async with self.http.get(default_pats) as r:
                 data = await r.text()
+                yaml = YAML(typ='safe')
                 defaults = yaml.load(data)
         else:
             defaults = {
@@ -58,5 +63,5 @@ class Pat(Command):
                 'bot_pat': 'http://i.imgur.com/tVzapCY.gif'
             }
 
-        self.config = Configuration.get_config('pats', defaults)
+        self.config = yaml_config('pats', defaults)
         self.log.debug('Pats loaded')

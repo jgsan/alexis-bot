@@ -6,7 +6,7 @@ from datetime import datetime
 
 import discord
 
-from bot import Language, constants, settings
+from bot import constants, settings
 from bot.manager import Manager
 from bot.lib.guild_configuration import GuildConfiguration
 from bot.database import BotDatabase
@@ -69,7 +69,7 @@ class AlexisBot(discord.Client):
 
         # Load configuration
         if not settings.discord_token:
-            raise RuntimeError('Discord bot token not defined. It should be in config.yml file.')
+            raise RuntimeError('Discord bot token not defined in settings.')
 
         # Load languages
         self.load_language()
@@ -112,6 +112,7 @@ class AlexisBot(discord.Client):
         """
         try:
             log.info('Loading language stuff...')
+            from .lib.language import Language
             self.lang = Language('lang', default=settings.default_language, autoload=True)
             log.info('Loaded languages: %s, default: %s', list(self.lang.lib.keys()), settings.default_language)
             return True

@@ -1,4 +1,5 @@
 import discord
+from ruamel.yaml import YAML
 
 from bot import settings
 from bot.lib.guild_configuration import GuildConfiguration
@@ -36,3 +37,16 @@ def is_pm(message):
 
 def is_bot_owner(member, bot):
     return member.id in settings.bot_owners
+
+
+def yaml_config(name, defaults=None, raise_exception=False):
+    file = settings.base_dir / 'config' / f'{name}.yml'
+    yaml = YAML(typ='safe')
+    try:
+        with file.open() as f:
+            yaml.load(f)
+    except Exception:
+        if raise_exception:
+            raise
+        return defaults
+    return yaml
