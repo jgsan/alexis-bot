@@ -2,6 +2,7 @@ import discord
 
 from discord import Embed
 
+from bot import settings
 from bot.lib.guild_configuration import GuildConfiguration
 from bot.lib.language import SingleLanguage
 from bot.utils import no_tags, auto_int
@@ -192,7 +193,7 @@ class MessageEvent:
 
     @property
     def bot_owner(self):
-        return any(x in self.bot.config['bot_owners'] for x in [str(self.message.author.id), self.message.author.id])
+        return any(x in settings.bot_owners for x in [str(self.message.author.id), self.message.author.id])
 
     @property
     def is_pm(self):
@@ -205,7 +206,7 @@ class MessageEvent:
     @property
     def prefix(self):
         """Retrieve and return the prefix"""
-        return self.bot.config.prefix if self.is_pm else self.config.prefix
+        return settings.command_prefix if self.is_pm else self.config.prefix
 
     @property
     def owner(self):
@@ -227,9 +228,9 @@ class MessageEvent:
     def lang(self):
         if self._lang is None:
             if self.guild is None:
-                self._lang = SingleLanguage(self.bot.lang, self.bot.config['default_lang'])
+                self._lang = SingleLanguage(self.bot.lang, settings.default_language)
             else:
-                lang_code = self.config.get('lang', self.bot.config['default_lang'])
+                lang_code = self.config.get('lang', settings.default_language)
                 self._lang = SingleLanguage(self.bot.lang, lang_code)
 
         return self._lang

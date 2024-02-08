@@ -1,10 +1,9 @@
 from logging import Logger
 import aiohttp
-import asyncio
 
 import discord
 
-from bot import CommandEvent
+from bot import CommandEvent, settings
 from . import SingleLanguage, categories
 from .bot import AlexisBot
 from .utils import lazy_property
@@ -55,11 +54,11 @@ class Command:
         :param channel: The channel instance to get channel-specific language. If not set, the server language is used.
         :return: The SingleLanguage instance with the determined language.
         """
-        lang_code = self.bot.config['default_lang']
+        lang_code = settings.default_language
 
         if isinstance(guild, discord.Guild):
             guildcfg = GuildConfiguration.get_instance(guild)
-            lang_code = guildcfg.get('lang', self.bot.config['default_lang'])
+            lang_code = guildcfg.get('lang', settings.default_language)
 
             # Use channel language if the argument has been passed
             if isinstance(channel, discord.TextChannel):

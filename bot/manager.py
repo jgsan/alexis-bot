@@ -99,9 +99,6 @@ class Manager:
         if len(db_models) > 0:
             self.bot.db.create_tables(db_models, safe=True)
 
-        if isinstance(instance.default_config, dict):
-            self.bot.config.load_defaults(instance.default_config)
-
         # Commands
         for name in [instance.name] + instance.aliases:
             if name != '':

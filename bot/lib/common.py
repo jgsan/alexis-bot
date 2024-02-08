@@ -1,5 +1,6 @@
 import discord
 
+from bot import settings
 from bot.lib.guild_configuration import GuildConfiguration
 
 
@@ -19,7 +20,7 @@ def is_owner(bot, member: discord.Member):
 
     # Check if the user has the owner role
     cfg = GuildConfiguration.get_instance(member.guild)
-    owner_roles = cfg.get_list('owner_roles', [bot.config['owner_role']])
+    owner_roles = cfg.get_list('owner_roles', [settings.owner_role])
     for role in member.roles:
         if str(role.id) in owner_roles \
                 or role.name in owner_roles \
@@ -34,4 +35,4 @@ def is_pm(message):
 
 
 def is_bot_owner(member, bot):
-    return member.id in bot.config['bot_owners']
+    return member.id in settings.bot_owners

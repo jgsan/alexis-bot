@@ -1,11 +1,10 @@
 import datetime
-import time
 from os import path, mkdir, stat
 
 import aiohttp
 import discord
 import re
-from discord import Embed, Colour
+from discord import Embed, Colour, Message
 
 from bot import constants
 from bot.logger import new_logger
@@ -382,7 +381,7 @@ def invite_filter(text):
     return text
 
 
-def message_link(message):
+def message_link(message: Message):
     return '{}/channels/{}/{}/{}'.format(
         constants.DISCORD_BASE,
         message.guild.id if message.guild else '@me',

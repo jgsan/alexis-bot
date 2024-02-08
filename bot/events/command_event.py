@@ -2,6 +2,7 @@ from datetime import timedelta, datetime
 
 import discord
 
+from bot import settings
 from bot.utils import serialize_avail, no_tags
 from .message_event import MessageEvent
 from ..lib.guild_configuration import GuildConfiguration
@@ -100,7 +101,7 @@ class CommandEvent(MessageEvent):
     @staticmethod
     def is_command(message, bot):
         if isinstance(message.channel, discord.DMChannel):
-            prefix = bot.config.prefix
+            prefix = settings.command_prefix
         else:
             prefix = GuildConfiguration.get_instance(message.channel.guild).prefix
 

@@ -3,7 +3,7 @@ import logging
 import peewee
 from playhouse.db_url import connect
 
-from bot.lib.configuration import BotConfiguration
+from bot import settings
 from bot.logger import new_logger
 
 peewee_log = new_logger('peewee')
@@ -15,8 +15,7 @@ class BotDatabase:
 
     @staticmethod
     def get_instance():
-        cfg = BotConfiguration.get_instance()
-        dburl = cfg['database_url']
+        dburl = settings.database_url
         if dburl.startswith('mysql:'):
             dburl += '&amp;' if '?' in dburl else '?'
             dburl += 'charset=utf8mb4;'

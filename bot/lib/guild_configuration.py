@@ -1,7 +1,7 @@
 from discord import Guild
 
+from bot import settings
 from bot.database import ServerConfig
-from bot.lib.configuration import BotConfiguration
 
 
 class GuildConfiguration:
@@ -262,8 +262,7 @@ class GuildConfiguration:
 
     @property
     def prefix(self):
-        bot_config = BotConfiguration.get_instance()
-        return self.get('command_prefix', bot_config.prefix)
+        return self.get('command_prefix', settings.command_prefix)
 
     @prefix.setter
     def prefix(self, value):

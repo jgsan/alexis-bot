@@ -2,7 +2,7 @@ import traceback
 
 from discord import Colour
 
-from bot import Command, CommandEvent, BotMentionEvent, MessageEvent
+from bot import Command, CommandEvent, BotMentionEvent, MessageEvent, settings
 from bot.lib.common import is_bot_owner, is_owner, is_pm
 from bot.lib.guild_configuration import GuildConfiguration
 
@@ -25,7 +25,7 @@ class CommandHandler(Command):
         try:
             await event.handle()
         except Exception as e:
-            if self.bot.config['debug']:
+            if settings.debug:
                 content = '```{}```'.format(traceback.format_exc())
                 title = '$[error-debug]'
             else:

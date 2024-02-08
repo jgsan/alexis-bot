@@ -3,7 +3,7 @@ import random
 from discord import Embed
 from datetime import datetime
 
-from bot import Command, BaseModel, categories
+from bot import Command, BaseModel, categories, settings
 from bot.utils import is_int
 from bot.regex import pat_usertag, pat_snowflake
 
@@ -182,7 +182,7 @@ class BanRank(Command):
 
     async def handle(self, cmd):
         bans = Ban.select().where(Ban.server == cmd.message.channel.guild.id).order_by(Ban.bans.desc())
-        px = self.bot.config['command_prefix']
+        px = settings.command_prefix
         banlist = []
         limit = 10 if cmd.cmdname == '{}{}'.format(px, self.name) else 5
 

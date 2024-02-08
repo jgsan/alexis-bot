@@ -6,16 +6,14 @@ from datetime import datetime
 
 import discord
 
-from bot import Language, constants
+from bot import Language, constants, settings
 from bot.manager import Manager
 from bot.lib.guild_configuration import GuildConfiguration
 from bot.database import BotDatabase
-from bot.lib.configuration import BotConfiguration
 from bot.logger import new_logger
 from bot.utils import auto_int
 
 log = new_logger('Core')
-config = BotConfiguration.get_instance()
 
 
 class AlexisBot(discord.Client):
@@ -29,7 +27,7 @@ class AlexisBot(discord.Client):
         Initializes configuration, logging, an aiohttp session and class attributes.
         :param options: The discord.Client options
         """
-        u_options = dict(chunk_guilds_at_startup=config.get('chunk_guilds'), **options)
+        u_options = dict(chunk_guilds_at_startup=settings.chunk_guilds, **options)
         intents = discord.Intents.default()
         intents.members = True
         super().__init__(**u_options, intents=intents)
@@ -44,7 +42,6 @@ class AlexisBot(discord.Client):
         self.deleted_messages_nolog = []
 
         self.manager = Manager(self)
-        self.config = config
         self.loop = asyncio.get_event_loop()
 
         # Dinamically create and override event handler methods
@@ -71,7 +68,7 @@ class AlexisBot(discord.Client):
         log.info('------')
 
         # Load configuration
-        if self.config.get('token', '') == '':
+        if not settings.discord_token:
             raise RuntimeError('Discord bot token not defined. It should be in config.yml file.')
 
         # Load languages
@@ -90,9 +87,9 @@ class AlexisBot(discord.Client):
         # Connect to Discord
         try:
             self.start_time = datetime.now()
-            chunking_info = ' (load guild chunks enabled!)' if config.get('chunk_guilds') else ''
+            chunking_info = ' (load guild chunks enabled!)' if settings.chunk_guilds else ''
             log.info('Connecting to Discord{}...'.format(chunking_info))
-            await self.start(self.config['token'])
+            await self.start(settings.discord_token)
         except discord.errors.LoginFailure:
             log.error('Invalid Discord token!')
             raise
@@ -108,20 +105,6 @@ class AlexisBot(discord.Client):
         self.manager.create_tasks()
         await self.manager.dispatch('on_ready')
 
-    def load_config(self):
-        """
-        Loads static configuration
-        :return: A boolean depending on the operation's result.
-        """
-        try:
-            log.info('Loading configuration...')
-            self.config = BotConfiguration.get_instance()
-            log.info('Configuration loaded')
-            return True
-        except Exception as ex:
-            log.exception(ex)
-            return False
-
     def load_language(self):
         """
         Loads language content
@@ -129,8 +112,8 @@ class AlexisBot(discord.Client):
         """
         try:
             log.info('Loading language stuff...')
-            self.lang = Language('lang', default=self.config['default_lang'], autoload=True)
-            log.info('Loaded languages: %s, default: %s', list(self.lang.lib.keys()), self.config['default_lang'])
+            self.lang = Language('lang', default=settings.default_language, autoload=True)
+            log.info('Loaded languages: %s, default: %s', list(self.lang.lib.keys()), settings.default_language)
             return True
         except Exception as ex:
             log.exception(ex)
