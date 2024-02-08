@@ -33,20 +33,17 @@ class Language:
 
             with codecs.open(lang_file, 'r', encoding='utf8') as f:
                 yml = YAML(typ='safe')
-                yml.load(f)
+                data = dict(yml.load(f))
                 lang = fn[:-4]
 
-                if not isinstance(yml, dict):
-                    log.warning('The file "%s" contains an invalid YAML structure.', lang_file)
-                else:
-                    for k, v in yml.items():
-                        if not isinstance(v, str) and not isinstance(v, int) and not isinstance(v, float):
-                            continue
+                for k, v in data.items():
+                    if not isinstance(v, str) and not isinstance(v, int) and not isinstance(v, float):
+                        continue
 
-                        if lang not in self.lib:
-                            self.lib[lang] = {}
+                    if lang not in self.lib:
+                        self.lib[lang] = {}
 
-                        self.lib[lang][k] = str(v)
+                    self.lib[lang][k] = str(v)
 
     def get(self, name, __lang=None, **kwargs):
         if __lang is None:

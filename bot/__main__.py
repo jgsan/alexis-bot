@@ -1,9 +1,6 @@
 import asyncio
 
-
 async def run():
-    from .bot import AlexisBot
-
     bot = AlexisBot.instance()
     async with bot:
         try:
@@ -13,4 +10,6 @@ async def run():
 
 
 if __name__ == '__main__':
+    from .bot import AlexisBot
+    from .commands import *
     asyncio.run(run())

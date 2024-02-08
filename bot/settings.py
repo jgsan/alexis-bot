@@ -26,6 +26,8 @@ allowlist_autoleave = getenv('ALLOWLIST_AUTOLEAVE', '1') == '1'
 allowlist_contact = getenv('ALLOWLIST_CONTACT', bot_owners[0])
 blocklist_servers = getenv('BLOCKLIST_SERVERS', '').split(',')
 
+command_guilds = getenv('COMMAND_GUILDS', '').split(',')
+
 weatherapi_key = ''
 
 try:

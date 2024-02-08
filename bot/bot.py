@@ -5,6 +5,7 @@ import sys
 from datetime import datetime
 
 import discord
+from discord import app_commands
 
 from bot import constants, settings
 from bot.manager import Manager
@@ -43,6 +44,7 @@ class AlexisBot(discord.Client):
 
         self.manager = Manager(self)
         self.loop = asyncio.get_event_loop()
+        self.tree = app_commands.CommandTree(self)
 
         # Dinamically create and override event handler methods
         from bot.constants import EVENT_HANDLERS
@@ -56,6 +58,13 @@ class AlexisBot(discord.Client):
 
             event = 'on_' + method
             setattr(self, event, make_handler(event, margs.copy()))
+    
+    async def setup_hook(self):
+        for guild_id in [i.strip() for i in settings.command_guilds if i.strip()]:
+            guild = discord.Object(id=int(guild_id))
+            self.tree.copy_global_to(guild=guild)
+            await self.tree.sync(guild=guild)
+            log.info('Commands loaded to guild ID %s', guild_id)
 
     async def init(self):
         """
@@ -218,6 +227,12 @@ class AlexisBot(discord.Client):
         if len(self.deleted_messages_nolog) > 50:
             del self.deleted_messages_nolog[0]
 
+    def command(self, *args, **kwargs):
+        def wrapper(f):
+            log.debug('Command loaded: %s', kwargs.get('name', f.__qualname__))
+            return self.tree.command(*args, **kwargs)(f)
+        return wrapper
+    
     @property
     def uptime(self):
         return datetime.now() - self.start_time
