@@ -31,6 +31,9 @@ class AlexisBot(discord.Client):
         u_options = dict(chunk_guilds_at_startup=settings.chunk_guilds, **options)
         intents = discord.Intents.default()
         intents.members = True
+        intents.guild_messages = True
+        intents.dm_messages = True
+        intents.message_content = True
         super().__init__(**u_options, intents=intents)
 
         self.db = None
@@ -58,7 +61,7 @@ class AlexisBot(discord.Client):
 
             event = 'on_' + method
             setattr(self, event, make_handler(event, margs.copy()))
-    
+
     async def setup_hook(self):
         for guild_id in [i.strip() for i in settings.command_guilds if i.strip()]:
             guild = discord.Object(id=int(guild_id))
@@ -232,7 +235,7 @@ class AlexisBot(discord.Client):
             log.debug('Command loaded: %s', kwargs.get('name', f.__qualname__))
             return self.tree.command(*args, **kwargs)(f)
         return wrapper
-    
+
     @property
     def uptime(self):
         return datetime.now() - self.start_time

@@ -110,8 +110,5 @@ pip-selfcheck.json
 # PyCharm and IDEA based IDEs
 .idea/
 
-# VSCode editor settings
-.vscode/
-
 # SonarQube scanner
 .scannerwork/

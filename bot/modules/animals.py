@@ -3,7 +3,7 @@ import random
 from bot import Command, utils, categories
 
 url_settings = {
-    'cat': ['http://aws.random.cat/meow', ['gato', 'gatito', 'neko'], 'file'],
+    'cat': ['https://cataas.com/cat?json=true', ['gato', 'gatito', 'neko'], '_id'],
     'dog': ['https://dog.ceo/api/breeds/image/random', ['perro', 'perrito', 'doggo'], 'message'],
     'shiba': ['http://shibe.online/api/shibes', ['shibe', 'shibainu'], 0],
     'fox': ['https://randomfox.ca/floof/', ['foxxo'], 'image'],
@@ -57,6 +57,8 @@ class RandomAnimal(Command):
                     else:
                         for prop in config[2].split('.'):
                             data = data.get(prop, '')
+                        if atype == 'cat':
+                            data = f'https://cataas.com/cat/{data}'
                     embed = utils.img_embed(data, f'$[animal-{atype}-title]')
                     return await cmd.answer(embed)
         except Exception as e:

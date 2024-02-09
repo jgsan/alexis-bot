@@ -4,7 +4,7 @@ from datetime import datetime
 import peewee
 from discord import Embed, Colour
 
-from bot import Command, CommandEvent, categories, BaseModel
+from bot import Command, CommandEvent, categories, BaseModel, settings
 from bot.utils import is_int, get_colour, format_date, colour_list
 
 pat_macro_name = re.compile(r'^[\w\-.,$%&¿?¡!+]{3,50}')
@@ -273,7 +273,7 @@ class MacroUse(Command):
 
     async def handle(self, cmd):
         # Get macro arguments
-        pfx = self.bot.config['command_prefix']
+        pfx = settings.command_prefix
         if cmd.message.content.startswith(pfx + ' '):
             macro_name = cmd.message.content.split(' ')[1]
             macro_args = (' '.join(cmd.args[1:])).split('|')

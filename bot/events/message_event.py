@@ -3,6 +3,7 @@ import discord
 from discord import Embed
 
 from bot import settings
+from bot.bot import AlexisBot
 from bot.lib.guild_configuration import GuildConfiguration
 from bot.lib.language import SingleLanguage
 from bot.utils import no_tags, auto_int
@@ -10,7 +11,7 @@ from bot.regex import pat_usertag, pat_channel, pat_snowflake
 
 
 class MessageEvent:
-    def __init__(self, message, bot):
+    def __init__(self, message, bot: AlexisBot):
         if not isinstance(message, discord.Message):
             raise RuntimeError('message argument is not a discord.Message instance')
 
@@ -68,7 +69,7 @@ class MessageEvent:
         """
         Shortcut method. Sends the "typing..." status to the event's channel.
         """
-        await self.channel.trigger_typing()
+        await self.channel.typing()
 
     def member_by_id(self, user_id):
         """

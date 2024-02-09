@@ -93,11 +93,11 @@ class SingleLanguage:
 
             return self.format(message) if pat_lang_placeholder.search(message) else message
         elif isinstance(message, Embed):
-            if message.title != Embed.Empty:
+            if message.title is not None:
                 message.title = self.format(message.title, locales)
-            if message.description != Embed.Empty:
+            if message.description is not None:
                 message.description = self.format(message.description, locales)
-            if message.footer.text != Embed.Empty:
+            if message.footer.text is not None:
                 message.set_footer(text=self.format(message.footer.text, locales), icon_url=message.footer.icon_url)
 
             for idx, field in enumerate(message.fields):
