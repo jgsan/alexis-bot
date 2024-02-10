@@ -1,4 +1,4 @@
-from bot import Command, categories
+from bot import Command, categories, settings
 from bot.utils import get_guild_role, auto_int
 
 
@@ -19,7 +19,7 @@ class OwnerRoles(Command):
             return await cmd.send_usage()
 
         await cmd.typing()
-        default_role = self.bot.config['owner_role']
+        default_role = settings.owner_role
         owner_roles = cmd.config.get_list('owner_roles', [default_role] if default_role else [])
 
         if cmd.args[0] in ['set', 'add', 'remove']:

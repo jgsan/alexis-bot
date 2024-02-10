@@ -43,7 +43,7 @@ class UserInfo(Command):
         embed.add_field(name='$[modlog-e-user-join]', value=utils.format_date(member.joined_at))
         embed.add_field(name='$[modlog-e-stance]',
                         value=utils.deltatime_to_str(utcnow() - member.joined_at), inline=False)
-        embed.set_thumbnail(url=str(member.avatar.url))
+        embed.set_thumbnail(url=str(member.display_avatar.url))
 
         if more and isinstance(member, discord.Member):
             n = UserNoteCmd.get_note(member)

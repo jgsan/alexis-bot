@@ -1,6 +1,6 @@
 from discord import Embed
 
-from bot import Command, categories
+from bot import Command, categories, settings
 
 
 class SetLanguage(Command):
@@ -20,7 +20,7 @@ class SetLanguage(Command):
                 emb = Embed(title='$[lang-title]',
                             description='$[lang-current-guild] \n$[lang-current-chan] \n$[lang-available-list]')
                 await cmd.answer(emb, locales={
-                    'lang': cmd.config.get('lang', self.bot.config['default_lang']),
+                    'lang': cmd.config.get('lang', settings.default_language),
                     'lang_list': ', '.join(self.bot.lang.lib.keys()),
                     'chan_lang': cmd.config.get('lang#'+str(cmd.channel.id))
                 })
@@ -54,7 +54,7 @@ class SetLanguage(Command):
 
                 cmd.config.unset('lang#'+str(chan.id))
                 self.log.debug('Set default language for channel %s in guild %s', cmd.config.get('lang'), cmd.guild)
-                sv_default = cmd.config.get('lang', self.bot.config['default_lang'])
+                sv_default = cmd.config.get('lang', settings.default_language)
                 await cmd.answer(self.bot.lang.get('lang-unset-chan', sv_default, lang=sv_default))
             else:
                 cmd.config.set('lang#'+str(chan.id), lang)
@@ -69,7 +69,7 @@ class SetLanguage(Command):
 
                 cmd.config.unset('lang')
                 self.log.debug('Set default language for guild %s', cmd.guild)
-                await cmd.answer(self.bot.lang.get('lang-unset', None, lang=self.bot.config['default_lang']))
+                await cmd.answer(self.bot.lang.get('lang-unset', None, lang=settings.default_language))
             else:
                 cmd.config.set('lang', cmd.text)
                 self.log.debug('Lang updated to %s for guild %s', cmd.config.get('lang'), cmd.guild)

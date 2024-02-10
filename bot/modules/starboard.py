@@ -211,7 +211,7 @@ class StarboardHook(Command):
     def create_embed(self, msg: Message, ts: datetime, footer_txt: str):
         embed = Embed()
         title = '{} - #{}'.format(msg.author.display_name, msg.channel.name)
-        embed.set_author(name=title, icon_url=msg.author.avatar.url)
+        embed.set_author(name=title, icon_url=msg.author.display_avatar.url)
         embed.description = msg.content
         embed.set_footer(text=str(ts))
 

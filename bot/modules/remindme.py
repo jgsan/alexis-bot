@@ -2,7 +2,7 @@ from datetime import datetime
 
 from discord import Embed
 
-from bot import Command, BaseModel, categories
+from bot import Command, BaseModel, categories, settings
 from peewee import DateTimeField, TextField, BooleanField
 from bot.utils import timediff_parse, no_tags, deltatime_to_str, format_date, auto_int
 from bot.regex import pat_delta
@@ -33,7 +33,6 @@ class RemindMe(Command):
         }
 
     async def handle(self, evt):
-        text_limit = self.bot.config.get('remindme_text_limit', 150)
         last = RemindMeEvent.get_or_none((RemindMeEvent.userid == evt.author.id) & (RemindMeEvent.sent == False))
 
         if evt.argc < 2:
@@ -69,8 +68,10 @@ class RemindMe(Command):
             return
 
         text = no_tags(' '.join(evt.args[1:]), self.bot, emojis=False).replace('\n', ' ')
-        if len(text) > text_limit:
-            await evt.answer('$[remindme-error-text-limit]', locales={'max': text_limit, 'amount': len(text)})
+        if len(text) > settings.remindme_text_limit:
+            await evt.answer('$[remindme-error-text-limit]', locales={
+                'max': settings.remindme_text_limit, 'amount': len(text)}
+            )
             return
 
         time = datetime.now() + dt

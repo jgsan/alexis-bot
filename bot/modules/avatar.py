@@ -18,7 +18,7 @@ class Avatar(Command):
             await cmd.answer('$[user-not-found]')
             return
 
-        ext_url = str(user.avatar.with_static_format('png'))
-        text = '$[user-avatar]' if bool(user.avatar.url) else '$[user-avatar-no]'
-        embed = img_embed(str(user.avatar.url), text, '[$[avatar-ext-link]]({})'.format(ext_url))
+        ext_url = str(user.display_avatar.with_static_format('png'))
+        text = '$[user-avatar]' if bool(user.display_avatar.url) else '$[user-avatar-no]'
+        embed = img_embed(str(user.display_avatar.url), text, '[$[avatar-ext-link]]({})'.format(ext_url))
         await cmd.answer(embed=embed, locales={'user': user.display_name})

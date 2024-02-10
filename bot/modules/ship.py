@@ -88,7 +88,7 @@ async def get_details(cmd: CommandEvent, text: str):
     item = parse_tag(text)
     if item is None or item['type'] == 'user':
         user = cmd.get_member(text) if item is None else cmd.get_member(item['id'])
-        return None if user is None else (user.display_name, str(user.avatar.url))
+        return None if user is None else (user.display_name, str(user.display_avatar.url))
     elif item['type'] == 'emoji':
         url = 'https://discordapp.com/api/emojis/{}.{}'
         return item['name'], url.format(item['id'], 'gif' if item['animated'] else 'png')

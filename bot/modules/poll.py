@@ -1,4 +1,4 @@
-from bot import Command, categories
+from bot import Command, categories, settings
 from discord import Embed
 
 import json
@@ -14,11 +14,11 @@ class Poll(Command):
         self.category = categories.UTILITY
 
         self.default_config = {
-            'polls_max_options': 6
+            'polls_max_options': settings.polls_max_options
         }
 
     async def handle(self, cmd):
-        max_options = self.bot.config.get('polls_max_options', 6)
+        max_options = settings.polls_max_options
         args = [x.strip() for x in cmd.text.split('|') if x.strip() != '']
 
         if len(args) <= 2:

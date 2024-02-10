@@ -1,4 +1,4 @@
-from bot import Command
+from bot import Command, settings
 
 
 class GuildWhitelist(Command):
@@ -12,17 +12,16 @@ class GuildWhitelist(Command):
         }
 
     async def on_ready(self):
-        if not self.bot.config.get('whitelist', False):
-            return
-
-        if not self.bot.config.get('whitelist_autoleave', False):
+        if not settings.allowlist_enabled or not settings.allowlist_servers or not settings.allowlist_autoleave:
+            self.log.debug('Allowlist disabled')
             return
 
         self.log.debug('I\'m in %s guilds', len(self.bot.servers))
-        wlist = self.bot.config.get('whitelist_servers', [])
+        wlist = settings.allowlist_servers
         guilds = [guild for guild in self.bot.guilds if guild.id not in wlist and int(guild.id) not in wlist]
         self.log.debug('%s guilds in the whitelist', len(wlist))
         self.log.debug('%s guilds not on the whitelist', len(guilds))
+
         for guild in guilds:
             self.log.debug('The guild "%s" (%s) is not on the whitelist, bye bye', guild.name, guild.id)
             await guild.leave()
@@ -34,7 +33,7 @@ class GuildWhitelist(Command):
 
         if guild.default_channel is not None:
             try:
-                wcontact = self.bot.config.get('whitelist_contact', '')
+                wcontact = settings.allowlist_contact
                 if wcontact == '':
                     message = '$[guildwl-bye] $[guildwl-admin]'
                     locales = None
@@ -51,8 +50,8 @@ class GuildWhitelist(Command):
         await guild.leave()
 
     def join_allowed(self, guild_id):
-        bl_list = self.bot.config.get('blacklist_servers', [])
-        wl_enabled = self.bot.config.get('whitelist', False)
-        wl_list = self.bot.config.get('whitelist_servers', [])
+        bl_list = settings.blocklist_servers
+        wl_enabled = settings.allowlist_enabled
+        wl_list = settings.allowlist_servers
 
         return guild_id not in bl_list and (not wl_enabled or guild_id in wl_list)

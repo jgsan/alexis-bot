@@ -1,6 +1,6 @@
 import discord
 
-from bot import Command, categories
+from bot import Command, categories, settings
 from bot.utils import get_guild_role
 
 cfg_roles = 'iam_roles'
@@ -125,7 +125,7 @@ class IAmRoles(Command):
 
         roles = cmd.config.get_list(cfg_roles)
         roles_locked = cmd.config.get_list(cfg_roles_locked)
-        limit = self.bot.config['iam_roles_limit']
+        limit = settings.iam_roles_limit
 
         if cmd.argc == 0:
             if len(roles) == 0:

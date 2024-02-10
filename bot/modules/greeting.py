@@ -2,7 +2,7 @@ import random
 
 from discord import Embed
 
-from bot import Command, categories
+from bot import Command, categories, settings
 from bot.lib.guild_configuration import GuildConfiguration
 from bot.utils import is_int, invite_filter, auto_int
 from bot.regex import pat_invite
@@ -36,8 +36,8 @@ class Greeting(Command):
         }
 
     async def handle(self, cmd):
-        max_msgs = self.bot.config.get('greeting_max_messages', 10)
-        max_length = self.bot.config.get('greeting_max_length', 1000)
+        max_msgs = settings.greeting_max_messages
+        max_length = settings.greeting_max_length
 
         is_welcome = cmd.cmdname == self.name
         cfg_channel = self.cfg_welcome_channel if is_welcome else self.cfg_goodbye_channel

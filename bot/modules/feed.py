@@ -2,7 +2,7 @@ import re
 from base64 import b64encode
 from discord import Embed
 
-from bot import Command
+from bot import Command, settings
 import feedparser
 
 pat_twitter = re.compile(r'^((https?://)?(www\.)?twitter\.com/|@)[a-zA-Z0-9_]{1,50}$')
@@ -112,11 +112,11 @@ class Feed(Command):
         return self.http.get(url, headers={'Authorization': 'Bearer ' + self.twitter_token})
 
     async def on_ready(self):
-        if self.bot.config['twitter_key'] == '' or self.bot.config['twitter_secret'] == '':
+        if not (settings.twitter_api_key and settings.twitter_api_secret):
             self.log.warn('Twitter keys not set up. Twitter feeds will be disabled.')
             return
 
-        auth_key = self.bot.config['twitter_key'] + ':' + self.bot.config['twitter_secret']
+        auth_key = settings.twitter_api_key + ':' + settings.twitter_api_secret
         auth_key = 'Basic ' + b64encode(auth_key.encode('ascii')).decode('ascii')
         auth_headers = {'Authorization': auth_key}
         auth_endpoint = 'https://api.twitter.com/oauth2/token?grant_type=client_credentials'

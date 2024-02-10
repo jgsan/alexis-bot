@@ -1,6 +1,6 @@
 import discord
 
-from bot import Command, CommandEvent
+from bot import Command, CommandEvent, settings
 from bot.lib.guild_configuration import GuildConfiguration
 from bot.utils import replace_everywhere
 
@@ -92,7 +92,7 @@ class LangFilter(Command):
 
             # Fetch common guilds between the user and the bot, and get the guilds languages.
             langs = [
-                self.bot.sv_config.get(sv.id, 'lang', self.bot.config['default_lang'])
+                self.bot.sv_config.get(sv.id, 'lang', settings.default_language)
                 for sv in self.bot.servers if sv.get_member(user.id) is not None
             ]
 

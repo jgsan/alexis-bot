@@ -5,7 +5,7 @@ import sys
 from datetime import datetime
 
 import discord
-from discord import app_commands
+from discord.app_commands import CommandTree
 
 from bot import constants, settings
 from bot.manager import Manager
@@ -47,7 +47,7 @@ class AlexisBot(discord.Client):
 
         self.manager = Manager(self)
         self.loop = asyncio.get_event_loop()
-        self.tree = app_commands.CommandTree(self)
+        self.tree = CommandTree(self)
 
         # Dinamically create and override event handler methods
         from bot.constants import EVENT_HANDLERS
@@ -69,7 +69,7 @@ class AlexisBot(discord.Client):
             await self.tree.sync(guild=guild)
             log.info('Commands loaded to guild ID %s', guild_id)
 
-    async def init(self):
+    def init(self):
         """
         Loads configuration, connects to database, and then connects to Discord.
         """
@@ -101,7 +101,7 @@ class AlexisBot(discord.Client):
             self.start_time = datetime.now()
             chunking_info = ' (load guild chunks enabled!)' if settings.chunk_guilds else ''
             log.info('Connecting to Discord{}...'.format(chunking_info))
-            await self.start(settings.discord_token)
+            self.run(settings.discord_token)
         except discord.errors.LoginFailure:
             log.error('Invalid Discord token!')
             raise

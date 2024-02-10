@@ -1,6 +1,6 @@
 import re
 
-from bot import Command, categories
+from bot import Command, categories, settings
 from bot.utils import is_float
 
 pat_currency = re.compile('[a-zA-Z]{3}')
@@ -139,11 +139,11 @@ class Value(Command):
     #
 
     async def convert(self, div1, div2):
-        if self.bot.config['currency_apikey'] == '':
+        if not settings.currency_api_key:
             raise DivRetrievalError('$[value-error-apikey]')
 
         attempts = 0
-        url = baseurl.format(div1, div2, self.bot.config['currency_apikey'])
+        url = baseurl.format(div1, div2, settings.currency_api_key)
         while attempts < 10:
             self.log.debug('Loading currency data, attempt ' + str(attempts + 1))
             self.log.debug('Loading URL %s', url)
@@ -178,10 +178,10 @@ class Value(Command):
     async def sbif(self, api):
         # TODO: Cache
         attempts = 0
-        if self.bot.config['sbif_apikey'] == '':
+        if not settings.sbif_api_key:
             raise DivRetrievalError('$[value-error-sbif-key]')
 
-        url = baseurl_sbif.format(api.lower(), self.bot.config['sbif_apikey'])
+        url = baseurl_sbif.format(api.lower(), settings.sbif_api_key)
 
         while attempts < 10:
             async with self.http.get(url) as r:
