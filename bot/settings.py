@@ -10,7 +10,7 @@ def s2l(val):  # string2list
 def tryint(val, default=None):
     try:
         return int(val)
-    except ValueError:
+    except (ValueError, TypeError):
         return default
 
 

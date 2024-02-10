@@ -184,7 +184,7 @@ class ModLog(Command):
 
     async def get_last_alog(self, guild: discord.Guild):
         try:
-            entries = (await guild.audit_logs(limit=1)).flatten()
+            entries = [entry async for entry in guild.audit_logs(limit=1)]
         except discord.Forbidden:
             return None
         except AttributeError:

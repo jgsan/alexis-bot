@@ -5,13 +5,13 @@ from .. import bot, log
 
 
 cmd_settings = {
-    'cat': ['https://cataas.com/cat?json=true', 'gato', 'url'],
+    'cat': ['https://cataas.com/cat?json=true', 'gato', '_id'],
     'dog': ['https://dog.ceo/api/breeds/image/random', 'perro', 'message'],
-    'shiba': ['http://shibe.online/api/shibes', 'shiba inu', 0],
+    'shiba': ['https://shibe.online/api/shibes', 'shiba inu', 0],
     'fox': ['https://randomfox.ca/floof/', 'zorro', 'image'],
     'duck': ['https://random-d.uk/api/random', 'pato', 'url'],
     'bunny': ['https://api.bunnies.io/v2/loop/random/?media=gif', 'conejo', 'media.gif'],
-    #'owl': ['http://pics.floofybot.moe/owl', 'buho', 'image'],  # not available
+    'owl': ['https://pics.floofybot.moe/owl', 'buho', 'image'],
 }
 
 
@@ -40,6 +40,8 @@ async def animal_interaction(cmd_type, interaction):
             if r.status == 200:
                 data = await r.json()
                 img_url = parse_item_result(cmd_type, data)
+                if cmd_type == 'cat':
+                    img_url = f'https://cataas.com/cat/{img_url}'
                 embed = discord.Embed(title=f'Aquí tienes tu {c_name}')
                 embed.set_image(url=img_url)
                 await interaction.response.send_message(embed=embed)
@@ -48,9 +50,6 @@ async def animal_interaction(cmd_type, interaction):
 
 
 for animal in cmd_settings.keys():
-    def generate():
-        that_animal = animal + ''
-        async def handler(interaction: discord.Interaction):
-            await animal_interaction(that_animal, interaction)
-        return handler
-    bot.command(name=animal, description=f'Obtener un {cmd_settings[animal][1]} al azar')(generate())
+    async def handler(interaction: discord.Interaction):
+        await animal_interaction(animal, interaction)
+    bot.command(name=animal, description=f'Obtener un {cmd_settings[animal][1]} al azar', coro=handler)

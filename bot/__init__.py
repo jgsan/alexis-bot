@@ -8,5 +8,5 @@ from .database import BaseModel
 from .lib.language import Language, SingleLanguage
 from .command import Command
 
-bot = AlexisBot.instance()
+bot = AlexisBot()
 log = new_logger('Sys')

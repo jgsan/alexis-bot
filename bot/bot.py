@@ -1,5 +1,4 @@
 from typing import Self
-import asyncio
 import platform
 import sys
 from datetime import datetime
@@ -46,7 +45,6 @@ class AlexisBot(discord.Client):
         self.deleted_messages_nolog = []
 
         self.manager = Manager(self)
-        self.loop = asyncio.get_event_loop()
         self.tree = CommandTree(self)
 
         # Dinamically create and override event handler methods
@@ -230,11 +228,18 @@ class AlexisBot(discord.Client):
         if len(self.deleted_messages_nolog) > 50:
             del self.deleted_messages_nolog[0]
 
-    def command(self, *args, **kwargs):
+    def command(self, *args, coro=None, **kwargs):
         def wrapper(f):
             log.debug('Command loaded: %s', kwargs.get('name', f.__qualname__))
-            return self.tree.command(*args, **kwargs)(f)
-        return wrapper
+            async def handler(interaction: discord.Interaction):
+                log.debug('Calling command %s', f)
+                await f(interaction)
+            return self.tree.command(*args, **kwargs)(handler)
+
+        if coro:
+            wrapper(coro)
+        else:
+            return wrapper
 
     @property
     def uptime(self):
@@ -242,8 +247,7 @@ class AlexisBot(discord.Client):
 
 
     _instance = None
-    @classmethod
-    def instance(cls) -> Self:
+    def __new__(cls) -> Self:
         if cls._instance is None:
-            cls._instance = cls()
+            cls._instance = super().__new__(cls)
         return cls._instance
