@@ -2,9 +2,8 @@ import traceback
 
 from discord import Colour
 
-from bot import Command, CommandEvent, BotMentionEvent, MessageEvent, settings
-from bot.lib.common import is_bot_owner, is_owner, is_pm
-from bot.lib.guild_configuration import GuildConfiguration
+from bot import Command, CommandEvent, BotMentionEvent, MessageEvent, GuildConfiguration, settings
+from bot.common import is_bot_owner, is_owner, is_pm
 
 
 class CommandHandler(Command):

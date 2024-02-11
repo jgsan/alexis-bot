@@ -2,8 +2,7 @@ import random
 
 from discord import Embed
 
-from bot import Command, categories, settings
-from bot.lib.guild_configuration import GuildConfiguration
+from bot import Command, GuildConfiguration, categories, settings
 from bot.utils import is_int, invite_filter, auto_int
 from bot.regex import pat_invite
 

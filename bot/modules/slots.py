@@ -1,5 +1,5 @@
 from bot import Command, categories
-from bot.lib.common import yaml_config
+from bot.common import yaml_config
 from discord import Embed
 import random
 

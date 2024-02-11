@@ -1,7 +1,6 @@
 import asyncio
 
-from bot import Command, categories
-from bot.lib.guild_configuration import GuildConfiguration
+from bot import GuildConfiguration, Command, categories
 from bot.utils import get_guild_role
 
 

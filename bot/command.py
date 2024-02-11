@@ -1,13 +1,15 @@
+from __future__ import annotations
 from logging import Logger
 import aiohttp
 
 import discord
 
-from bot import CommandEvent, settings
-from . import SingleLanguage, categories
-from .bot import AlexisBot
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from bot.bot import AlexisBot
+
+from bot import GuildConfiguration, CommandEvent, SingleLanguage, categories, settings
 from .utils import lazy_property
-from .lib.guild_configuration import GuildConfiguration
 from .logger import new_logger
 
 

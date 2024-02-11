@@ -6,8 +6,7 @@ import emoji
 from discord import Emoji, Embed, Member, Message, Reaction
 from discord.utils import utcnow
 
-from bot import Command, BotDatabase, categories
-from bot.lib.guild_configuration import GuildConfiguration
+from bot import Command, BotDatabase, GuildConfiguration, categories
 from bot.utils import auto_int, compare_ids
 
 

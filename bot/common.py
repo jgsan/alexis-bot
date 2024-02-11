@@ -1,8 +1,7 @@
 import discord
 from ruamel.yaml import YAML
 
-from bot import settings
-from bot.lib.guild_configuration import GuildConfiguration
+from bot import GuildConfiguration, settings
 
 
 def is_owner(bot, member: discord.Member):

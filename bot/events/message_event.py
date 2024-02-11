@@ -1,11 +1,13 @@
+from __future__ import annotations
 import discord
 
 from discord import Embed
 
-from bot import settings
-from bot.bot import AlexisBot
-from bot.lib.guild_configuration import GuildConfiguration
-from bot.lib.language import SingleLanguage
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from bot import AlexisBot
+
+from bot import GuildConfiguration, SingleLanguage, settings
 from bot.utils import no_tags, auto_int
 from bot.regex import pat_usertag, pat_channel, pat_snowflake
 

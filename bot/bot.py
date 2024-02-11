@@ -9,10 +9,8 @@ import asyncio
 import discord
 from discord.app_commands import CommandTree
 
-from bot import constants, settings, modules
-from bot.database import BotDatabase
-from .lib import GuildConfiguration, Language
-from .lib.common import is_pm
+from bot import GuildConfiguration, BotDatabase, Language, constants, settings, modules
+from .common import is_pm
 from bot.logger import new_logger
 from bot.utils import auto_int
 
@@ -136,7 +134,7 @@ class AlexisBot(discord.Client):
         try:
             log.info('Loading language stuff...')
 
-            self.lang = Language('lang', default=settings.default_language, autoload=True)
+            self.lang = Language(default=settings.default_language, autoload=True)
             log.info('Loaded languages: %s, default: %s', list(self.lang.lib.keys()), settings.default_language)
             return True
         except Exception as ex:

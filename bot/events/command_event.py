@@ -2,10 +2,9 @@ from datetime import timedelta, datetime
 
 import discord
 
-from bot import settings
+from bot import GuildConfiguration, settings
+from bot.events.message_event import MessageEvent
 from bot.utils import serialize_avail, no_tags
-from .message_event import MessageEvent
-from ..lib.guild_configuration import GuildConfiguration
 from ..regex import pat_usertag
 
 

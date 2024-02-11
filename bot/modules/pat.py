@@ -3,7 +3,7 @@ from ruamel.yaml import YAML
 
 from bot import Command, categories
 from bot.utils import img_embed
-from bot.lib.common import yaml_config
+from bot.common import yaml_config
 
 default_pats = 'https://l.owo.cl/default_pats'
 

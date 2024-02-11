@@ -1,11 +1,9 @@
-import glob
 import re
-import codecs
 
-from os import path
 from ruamel.yaml import YAML
 from discord import Embed
 
+from bot import settings
 from bot.logger import new_logger
 
 pat_lang_placeholder = re.compile(r'\$\[([a-zA-Z0-9_\-]+)\]')
@@ -13,9 +11,9 @@ log = new_logger('Language')
 
 
 class Language:
-    def __init__(self, langpath, default='en', autoload=False):
+    def __init__(self, default='en', autoload=False):
         self.lib = {}
-        self.path = langpath
+        self.path = settings.base_dir / 'lang'
         self.default = default
 
         if autoload:
@@ -23,18 +21,16 @@ class Language:
 
     def load(self):
         self.lib = {}
-        p = path.join(self.path, "**{s}*.yml".format(s=path.sep))
-        lang_files = glob.iglob(p, recursive=True)
+        lang_files = self.path.glob('**/*.yml')
 
         for lang_file in lang_files:
-            fn = path.basename(lang_file)
-            if not path.isfile(lang_file) or not fn.endswith('.yml'):
+            if not lang_file.is_file() or not lang_file.name.endswith('.yml'):
                 continue
 
-            with codecs.open(lang_file, 'r', encoding='utf8') as f:
+            with lang_file.open(encoding='utf8') as f:
                 yml = YAML(typ='safe')
                 data = dict(yml.load(f))
-                lang = fn[:-4]
+                lang = lang_file.name[:-4]
 
                 for k, v in data.items():
                     if not isinstance(v, str) and not isinstance(v, int) and not isinstance(v, float):

@@ -1,7 +1,6 @@
 import discord
 
-from bot import Command, CommandEvent, settings
-from bot.lib.guild_configuration import GuildConfiguration
+from bot import Command, CommandEvent, GuildConfiguration, settings
 from bot.utils import replace_everywhere
 
 

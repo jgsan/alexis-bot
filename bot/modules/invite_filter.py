@@ -1,8 +1,7 @@
 from discord import Embed, DMChannel
 
-from bot import Command, categories
-from bot.lib.common import is_owner
-from bot.lib.guild_configuration import GuildConfiguration
+from bot import Command, GuildConfiguration, categories
+from bot.common import is_owner
 from bot.regex import pat_invite
 
 

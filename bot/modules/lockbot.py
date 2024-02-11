@@ -1,8 +1,7 @@
-from discord import Embed, TextChannel, DMChannel, Message
+from discord import Embed, TextChannel, Message
 
-from bot import Command, categories
-from bot.lib.common import is_owner, is_pm
-from bot.lib.guild_configuration import GuildConfiguration
+from bot import Command, GuildConfiguration, categories
+from bot.common import is_owner, is_pm
 from bot.regex import pat_channel
 from bot.utils import auto_int
 
