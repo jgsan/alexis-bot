@@ -1,6 +1,7 @@
 import itertools
-from bot.database import BotDatabase, BaseModel
-from bot.manager import Manager
+import peewee
+from bot.database import BotDatabase
+from bot import bot
 
 
 def run():
@@ -8,14 +9,14 @@ def run():
     models = [
         x for x in itertools.chain.from_iterable(
             cls.db_models for cls in [
-                cls for cls in Manager.get_mods() if len(getattr(cls, 'db_models', [])) > 0
+                cls for cls in bot.get_mods() if len(getattr(cls, 'db_models', [])) > 0
             ]
-        ) if issubclass(x, BaseModel)
+        ) if issubclass(x, peewee.Model)
     ]
 
     print('Models loaded ({}):'.format(len(models)), models)
     print('Creating tables...')
-    BotDatabase.initialize().create_tables(models)
+    BotDatabase().create_tables(models)
     print('Tables created!')
 
 

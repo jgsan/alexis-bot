@@ -18,7 +18,6 @@ class Command:
 
     def __init__(self, bot: AlexisBot):
         self.bot = bot
-        self.mgr = bot.manager
         self.name = ''  # Command name
         self.aliases = []  # Command aliases
         self.schedule = []

@@ -1,15 +1,18 @@
 from typing import Self
 import platform
 import sys
+import inspect
+import importlib
 from datetime import datetime
 
+import asyncio
 import discord
 from discord.app_commands import CommandTree
 
-from bot import constants, settings
-from bot.manager import Manager
-from bot.lib.guild_configuration import GuildConfiguration
+from bot import constants, settings, modules
 from bot.database import BotDatabase
+from .lib import GuildConfiguration, Language
+from .lib.common import is_pm
 from bot.logger import new_logger
 from bot.utils import auto_int
 
@@ -36,6 +39,7 @@ class AlexisBot(discord.Client):
         super().__init__(**u_options, intents=intents)
 
         self.db = None
+        self.tasks_loop = asyncio.new_event_loop()
         self.initialized = False
         self.start_time = datetime.now()
         self.connect_delta = None
@@ -44,8 +48,29 @@ class AlexisBot(discord.Client):
         self.deleted_messages = []
         self.deleted_messages_nolog = []
 
-        self.manager = Manager(self)
         self.tree = CommandTree(self)
+
+        self.cmds = {}
+        self.tasks = {}
+        self.swhandlers = {}
+        self.cmd_instances = []
+        self.mention_handlers = []
+
+        #headers = {'User-Agent': '{}/{} (https://alexisbot.mak.wtf/)'.format(self.__class__.name, self.__class__.__version__)}
+        #self.http = aiohttp.ClientSession(headers=headers, cookie_jar=aiohttp.CookieJar(unsafe=True))
+
+        # Dinamically create and override bot event handler methods
+        from bot.constants import EVENT_HANDLERS
+        for method, margs in EVENT_HANDLERS.items():
+            def make_handler(event_name, event_args):
+                async def dispatch(*args):
+                    kwargs = dict(zip(event_args, args))
+                    await self.dispatch_event(event_name=event_name, **kwargs)
+
+                return dispatch
+
+            event = 'on_' + method
+            setattr(self, event, make_handler(event, margs.copy()))
 
     async def setup_hook(self):
         for guild_id in [i.strip() for i in settings.command_guilds if i.strip()]:
@@ -73,13 +98,14 @@ class AlexisBot(discord.Client):
 
         # Load database
         log.info('Connecting to the database...')
-        self.db = BotDatabase.initialize()
+        self.db = BotDatabase()
+        GuildConfiguration.create_table(self.db)
         log.info('Successfully conected to database using %s', self.db.__class__.__name__)
 
         # Load command classes and instances from bots.modules
         log.info('Loading commands...')
-        self.manager.load_instances()
-        self.manager.dispatch_sync('on_loaded', force=True)
+        self.load_instances()
+        self.dispatch_sync('on_loaded', force=True)
 
         # Connect to Discord
         try:
@@ -99,8 +125,8 @@ class AlexisBot(discord.Client):
         log.info('------')
 
         self.initialized = True
-        self.manager.create_tasks()
-        await self.manager.dispatch('on_ready')
+        self.create_tasks()
+        await self.dispatch_event('on_ready')
 
     def load_language(self):
         """
@@ -109,7 +135,7 @@ class AlexisBot(discord.Client):
         """
         try:
             log.info('Loading language stuff...')
-            from .lib.language import Language
+
             self.lang = Language('lang', default=settings.default_language, autoload=True)
             log.info('Loaded languages: %s, default: %s', list(self.lang.lib.keys()), settings.default_language)
             return True
@@ -126,7 +152,7 @@ class AlexisBot(discord.Client):
         await super().close()
 
         # Stop tasks
-        self.manager.cancel_tasks()
+        self.cancel_tasks()
 
     async def send_modlog(self, guild: discord.Guild, message=None, embed: discord.Embed = None,
                           locales=None, logtype=None):
@@ -167,7 +193,7 @@ class AlexisBot(discord.Client):
             raise RuntimeError('destination must be a discord.abc.Messageable compatible instance')
 
         # Call pre_send_message handlers, append destination
-        self.manager.dispatch_ref('pre_send_message', kwargs)
+        self.dispatch_ref('pre_send_message', kwargs)
 
         # Log the message
         if isinstance(destination, discord.TextChannel):
@@ -216,7 +242,7 @@ class AlexisBot(discord.Client):
             del self.deleted_messages_nolog[0]
 
     def command(self, *args, coro=None, **kwargs):
-        wrapper = self.manager.command_handler(*args, **kwargs)
+        wrapper = self.command_handler(*args, **kwargs)
 
         if coro:
             wrapper(coro)
@@ -233,3 +259,277 @@ class AlexisBot(discord.Client):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
+
+
+    def load_instances(self):
+        """Loads instances for the command classes loaded"""
+        self.cmd_instances = []
+        for c in self.get_mods():
+            self.cmd_instances.append(self.load_module(c))
+        self.sort_instances()
+
+        log.info('%i modules were loaded', len(self.cmd_instances))
+        log.debug('Commands loaded: ' + ', '.join(self.cmds.keys()))
+        log.debug('Modules loaded: ' + ', '.join([i.__class__.__name__ for i in self.cmd_instances]))
+
+    def unload_instance(self, name):
+        """
+        Removes from memory a module instance, and disabling its commands and event handlers.
+        :param name: Module's name.
+        """
+        instance = None
+        for i in self.cmd_instances:
+            if i.__class__.__name__ == name:
+                instance = i
+
+        if instance is None:
+            return
+
+        log.debug('Disabling %s module...', name)
+
+        # Unload commands
+        cmd_names = [n for n in [instance.name] + instance.aliases if n != '']
+        for cmd_name in cmd_names:
+            if cmd_name not in self.cmds:
+                continue
+            else:
+                del self.cmds[cmd_name]
+
+        # Unload startswith handlers
+        for swname in instance.swhandler:
+            if swname not in self.swhandlers:
+                continue
+            else:
+                del self.swhandlers[swname]
+
+        # Unload mention handlers
+        for mhandler in self.mention_handlers:
+            if mhandler.__class__.__name__ == name:
+                self.mention_handlers.remove(mhandler)
+
+        # Hackily unload task
+        for task_name in [str(k) for k in self.tasks.keys()]:
+            if task_name.startswith(name+'.'):
+                log.debug('Cancelling task %s', task_name)
+                self.tasks[task_name].cancel()
+                del self.tasks[task_name]
+
+        # Remove from instances list
+        self.cmd_instances.remove(instance)
+        log.info('"%s" module disabled', name)
+
+    def sort_instances(self):
+        self.cmd_instances = sorted(self.cmd_instances, key=lambda i: i.priority)
+
+    def load_module(self, cls):
+        """
+        Loads a command module into the bot
+        :param cls: The module class to load
+        :return: A module class' instance
+        """
+
+        instance = cls(self)
+        db_models = getattr(cls, 'db_models', [])
+        if len(db_models) > 0:
+            self.db.db.create_tables(db_models, safe=True)
+
+        # Commands
+        for name in [instance.name] + instance.aliases:
+            if name != '':
+                self.cmds[name] = instance
+
+        # Startswith handlers
+        for swtext in instance.swhandler:
+            if swtext != '':
+                log.debug('Registering starts-with handler "%s"', swtext)
+                self.swhandlers[swtext] = instance
+
+        # Commands activated with mentions
+        if isinstance(instance.mention_handler, bool) and instance.mention_handler:
+            self.mention_handlers.append(instance)
+
+        if self.user:
+            self.create_tasks(instance)
+
+        return instance
+
+    def create_tasks(self, instance=None):
+        instances = self.cmd_instances if instance is None else [instance]
+
+        for instance in instances:
+            # Scheduled (repetitive) tasks
+            if isinstance(instance.schedule, list):
+                for (task, seconds) in instance.schedule:
+                    self.schedule(task, seconds)
+            elif isinstance(instance.schedule, tuple):
+                task, seconds = instance.schedule
+                self.schedule(task, seconds)
+
+    async def run_task(self, task, time=0):
+        """
+        Runs a task on a given interval
+        :param task: The task function
+        :param time: The time in seconds to repeat the task
+        """
+        while 1:
+            try:
+                # log.debug('Running task %s', repr(task))
+                await task()
+            except Exception as e:
+                log.exception(e)
+
+    def schedule(self, task, time=0, force=False):
+        """
+        Adds a task to the loop to be run every *time* seconds.
+        :param task: The task function
+        :param time: The time in seconds to repeat the task
+        :param force: What to do if the task was already created. If True, the task is cancelled and created again.
+        """
+        if time < 0:
+            raise RuntimeError('Task interval time must be positive')
+
+        task_name = '{}.{}'.format(task.__self__.__class__.__name__, task.__name__)
+        if task_name in self.tasks:
+            if not force:
+                return
+            self.tasks[task_name].cancel()
+
+        task_ins = self.tasks_loop.create_task(self.run_task(task, time))
+        self.tasks[task_name] = task_ins
+
+        if time > 0:
+            log.debug('Task "%s" created, repeating every %i seconds', task_name, time)
+        else:
+            log.debug('Task "%s" created, running once', task_name)
+
+        return task_ins
+
+    def get_handlers(self, name):
+        return [getattr(c, name, None) for c in self.cmd_instances if callable(getattr(c, name, None))]
+
+    async def dispatch_event(self, event_name, **kwargs):
+        """
+        Calls event methods on loaded methods.
+        :param event_name: Event handler name
+        :param kwargs: Event parameters
+        """
+        if not self.initialized:
+            return
+
+        message = kwargs.get('message', None)
+
+        for x in self.get_handlers('pre_' + event_name):
+            y = await x(**kwargs)
+
+            if y is not None and isinstance(y, bool) and not y:
+                return
+
+        if event_name == 'on_message':
+            # Log PMs
+            if is_pm(message) and message.content != '':
+                if message.author.id == self.user.id:
+                    log.info('[PM] (-> %s): %s', message.channel.recipient, message.content)
+                else:
+                    log.info('[PM] (<- %s): %s', message.author, message.content)
+
+        for z in self.get_handlers(event_name):
+            await z(**kwargs)
+
+    def dispatch_sync(self, name, force=False, **kwargs):
+        """
+        Synchronously (without event loop) calls "handlers" methods on loaded modules.
+        :param name: Handler name
+        :param force: Call handlers even if the bot is not initialized
+        :param kwargs: Event parameters
+        """
+        if not self.initialized and not force:
+            return
+
+        for z in self.get_handlers(name):
+            z(**kwargs)
+
+    def dispatch_ref(self, name, kwargs):
+        if not self.initialized:
+            return
+
+        for z in self.get_handlers(name):
+            z(kwargs)
+
+    def has_cmd(self, name):
+        return name in self.cmds
+
+    def get_cmd(self, name):
+        return None if not self.has_cmd(name) else self.cmds[name]
+
+    def get_mod(self, name):
+        for i in self.cmd_instances:
+            if i.__class__.__name__ == name:
+                return i
+
+        return None
+
+    def has_mod(self, name):
+        return self.get_mod(name) is not None
+
+    def get_by_cmd(self, cmdname):
+        for i in self.cmd_instances:
+            if i.name == cmdname or cmdname in i.aliases:
+                return i
+
+        return None
+
+    async def activate_mod(self, name):
+        classes = self.get_mods()
+        for cls in classes:
+            if cls.__name__ == name:
+                log.debug('Loading "%s" module...', name)
+                ins = self.load_module(cls)
+                if hasattr(ins, 'on_loaded'):
+                    log.debug('Calling on_loaded for "%s"', name)
+                    ins.on_loaded()
+                if hasattr(ins, 'on_ready'):
+                    log.debug('Calling on_ready for "%s"', name)
+                    await ins.on_ready()
+
+                self.cmd_instances.append(ins)
+                self.sort_instances()
+                log.debug('"%s" module loaded', name)
+                return True
+
+        return False
+
+    def cancel_tasks(self):
+        for task_name in list(self.tasks.keys()):
+            self.tasks[task_name].cancel()
+            del self.tasks[task_name]
+        log.debug('All tasks cancelled.')
+
+    def command_handler(self, *args, **kwargs):
+        def wrapper(f):
+            kwargs['name'] = kwargs.get('name', f.__qualname__)
+            log.debug('Loading command: %s', kwargs['name'])
+            async def handler(interaction: discord.Interaction):
+                log.debug('Calling command %s', f)
+                await f(interaction)
+            return self.tree.command(*args, **kwargs)(handler)
+
+        return wrapper
+
+    @staticmethod
+    def get_mods():
+        from .command import Command
+        classes = []
+        bot_modules = ['bot.modules.' + x for x in modules.__all__]
+
+        for imod in bot_modules:
+            try:
+                members = inspect.getmembers(importlib.import_module(imod))
+                for name, clz in members:
+                    if name == 'Command' or not inspect.isclass(clz) or not issubclass(clz, Command):
+                        continue
+                    classes.append(clz)
+            except ImportError as e:
+                log.error('Could not load a module')
+                log.exception(e)
+                continue
+        return set(classes)

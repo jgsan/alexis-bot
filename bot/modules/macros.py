@@ -4,13 +4,13 @@ from datetime import datetime
 import peewee
 from discord import Embed, Colour
 
-from bot import Command, CommandEvent, categories, BaseModel, settings
+from bot import Command, BotDatabase, categories, settings
 from bot.utils import is_int, get_colour, format_date, colour_list
 
 pat_macro_name = re.compile(r'^[\w\-.,$%&¿?¡!+]{3,50}')
 
 
-class EmbedMacro(BaseModel):
+class EmbedMacro(peewee.Model):
     name = peewee.TextField()
     server = peewee.TextField()
     image_url = peewee.TextField(null=True)
@@ -20,6 +20,8 @@ class EmbedMacro(BaseModel):
     created = peewee.DateTimeField(default=datetime.now)
     used_count = peewee.IntegerField(default=0, null=False)
 
+    class Meta:
+        database = BotDatabase().db
 
 class MacroSet(Command):
     db_models = [EmbedMacro]
@@ -50,7 +52,7 @@ class MacroSet(Command):
         description = ''
         embed_colour = Colour.default()
 
-        if name in self.bot.manager:
+        if self.bot.has_cmd(name):
             await cmd.answer('$[macros-err-cmd-name]')
             return
 
@@ -151,7 +153,7 @@ class MacroRename(Command):
             await cmd.answer('$[format]: $[macros-rename-format]')
             return
 
-        if cmd.args[1] in self.bot.manager:
+        if self.bot.has_cmd(cmd.args[1]):
             await cmd.answer('$[macros-err-rename-cmd]')
             return
 

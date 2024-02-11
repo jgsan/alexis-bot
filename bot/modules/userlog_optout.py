@@ -1,15 +1,18 @@
 from datetime import datetime
 
 import peewee
-from bot import Command, BaseModel
+from bot import Command, BotDatabase
 
 optout_cache = {}
 noopt_cache = set()
 
 
-class UserLogOptOut(BaseModel):
+class UserLogOptOut(peewee.Model):
     userid = peewee.TextField()
     timestamp = peewee.DateTimeField(default=datetime.now)
+
+    class Meta:
+        database = BotDatabase().db
 
     @classmethod
     def user_opted_out(cls, userid):
@@ -25,7 +28,7 @@ class UserLogOptOut(BaseModel):
         except UserLogOptOut.DoesNotExist:
             noopt_cache.add(userid)
             return None
-    
+
     @classmethod
     def user_optout(cls, userid):
         res, created = UserLogOptOut.get_or_create(userid=userid)
@@ -49,12 +52,12 @@ class ModlogOptOut(Command):
 
         global optout_cache
         optout_cache = {u.userid: u.timestamp for u in UserLogOptOut.select()}
-    
+
     async def handle(self, cmd):
         if cmd.argc == 0:
             await cmd.answer('$[userlog-optout-details]', as_embed=True)
             return
-        
+
         if cmd.args[0] != 'yes':
             await cmd.answer('$[userlog-optout-confirm]')
             return

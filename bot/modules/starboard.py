@@ -6,15 +6,18 @@ import emoji
 from discord import Emoji, Embed, Member, Message, Reaction
 from discord.utils import utcnow
 
-from bot import Command, categories, BaseModel
+from bot import Command, BotDatabase, categories
 from bot.lib.guild_configuration import GuildConfiguration
 from bot.utils import auto_int, compare_ids
 
 
-class Starboard(BaseModel):
+class Starboard(peewee.Model):
     message_id = peewee.TextField()
     starboard_id = peewee.TextField(default='')
     timestamp = peewee.DateTimeField(null=False)
+
+    class Meta:
+        database = BotDatabase().db
 
 
 default_count = '10'

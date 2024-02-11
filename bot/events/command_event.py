@@ -44,7 +44,7 @@ class CommandEvent(MessageEvent):
 
         data_db = self.config.get('cmd_status', '')
         avail = serialize_avail(data_db)
-        cmd = self.bot.manager[self.cmdname]
+        cmd = self.bot.get_cmd(self.cmdname)
         enabled_db = avail.get(cmd.name, '+' if cmd.default_enabled else '-')
         return enabled_db == '+'
 
@@ -65,7 +65,7 @@ class CommandEvent(MessageEvent):
         )
 
     async def handle(self):
-        cmd = self.bot.manager[self.cmdname]
+        cmd = self.bot.get_cmd(self.cmdname)
 
         # Time and permissions filter
         if (cmd.bot_owner_only and not self.bot_owner) \
@@ -96,7 +96,7 @@ class CommandEvent(MessageEvent):
 
     @property
     def command(self):
-        return self.bot.manager[self.cmdname]
+        return self.bot.get(self.cmdname)
 
     @staticmethod
     def is_command(message, bot):
@@ -107,6 +107,6 @@ class CommandEvent(MessageEvent):
 
         if message.content.startswith(prefix):
             cmdname = message.content[len(prefix):].split(' ')[0].split(':')[0]
-            return cmdname in bot.manager
+            return bot.has_cmd(cmdname)
         else:
             return False

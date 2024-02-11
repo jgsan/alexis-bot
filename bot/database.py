@@ -1,6 +1,5 @@
 import logging
 
-import peewee
 from playhouse.db_url import connect
 
 from bot import settings
@@ -11,33 +10,17 @@ peewee_log.setLevel(logging.INFO)
 
 
 class BotDatabase:
-    _db = None
+    _ins = None
 
-    @staticmethod
-    def get_instance():
+    def __new__(cls):
+        if cls._ins is None:
+            cls._ins = super().__new__(cls)
+        return cls._ins
+
+    def __init__(self):
         dburl = settings.database_url
         if dburl.startswith('mysql:'):
             dburl += '&amp;' if '?' in dburl else '?'
             dburl += 'charset=utf8mb4;'
 
-        if BotDatabase._db is None:
-            BotDatabase._db = connect(dburl, autorollback=True)
-
-        return BotDatabase._db
-
-    @staticmethod
-    def initialize():
-        ins = BotDatabase.get_instance()
-        ins.create_tables([ServerConfig], safe=True)
-        return ins
-
-
-class BaseModel(peewee.Model):
-    class Meta:
-        database = BotDatabase.get_instance()
-
-
-class ServerConfig(BaseModel):
-    serverid = peewee.TextField()
-    name = peewee.TextField()
-    value = peewee.TextField(default='')
+        self.db = connect(dburl, autorollback=True)

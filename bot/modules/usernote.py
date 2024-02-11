@@ -1,13 +1,17 @@
 import discord
 import peewee
 
-from bot import Command, BaseModel, categories
+from bot import Command, BotDatabase, categories
 
 
-class UserNote(BaseModel):
+class UserNote(peewee.Model):
     userid = peewee.TextField()
     serverid = peewee.TextField()
     note = peewee.TextField(default='')
+
+
+    class Meta:
+        database = BotDatabase().db
 
 
 class UserNoteCmd(Command):

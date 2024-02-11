@@ -14,5 +14,5 @@ class ReloadCmd(Command):
             await cmd.answer('$[reload-err]')
             return
 
-        nmods = len([i.load_config() for i in self.bot.manager.cmd_instances if callable(getattr(i, 'load_config', None))])
+        nmods = len([i.load_config() for i in self.bot.cmd_instances if callable(getattr(i, 'load_config', None))])
         await cmd.answer('$[reload-reloaded]', locales={'rel_mods': nmods})

@@ -1,19 +1,22 @@
 from datetime import datetime
 
+import peewee
 from discord import Embed
 
-from bot import Command, BaseModel, categories, settings
-from peewee import DateTimeField, TextField, BooleanField
+from bot import Command, BotDatabase, categories, settings
 from bot.utils import timediff_parse, no_tags, deltatime_to_str, format_date, auto_int
 from bot.regex import pat_delta
 
 
-class RemindMeEvent(BaseModel):
-    created = DateTimeField(default=datetime.now)
-    userid = TextField()
-    description = TextField()
-    alerttime = DateTimeField()
-    sent = BooleanField(default=False)
+class RemindMeEvent(peewee.Model):
+    created = peewee.DateTimeField(default=datetime.now)
+    userid = peewee.TextField()
+    description = peewee.TextField()
+    alerttime = peewee.DateTimeField()
+    sent = peewee.BooleanField(default=False)
+
+    class Meta:
+        database = BotDatabase().db
 
 
 class RemindMe(Command):

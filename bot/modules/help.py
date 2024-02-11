@@ -20,7 +20,7 @@ class Help(Command):
 
     async def handle(self, cmd):
         if cmd.argc > 0:
-            ins = self.bot.manager.get_cmd(cmd.args[0])
+            ins = self.bot.get_cmd(cmd.args[0])
             if ins is None or (ins.owner_only and not cmd.owner) or (ins.bot_owner_only and not cmd.bot_owner):
                 await cmd.answer('$[command-not-available]')
             else:
@@ -35,8 +35,8 @@ class Help(Command):
             return
 
         commands = {}
-        for k in self.bot.manager.cmds.keys():
-            ins = self.bot.manager[k]
+        for k in self.bot.cmds.keys():
+            ins = self.bot.get_cmd(k)
 
             if ins.owner_only and not cmd.owner or ins.bot_owner_only and not cmd.bot_owner:
                 continue

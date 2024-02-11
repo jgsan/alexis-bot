@@ -1,7 +1,21 @@
+import peewee
 from discord import Guild
 
 from bot import settings
-from bot.database import ServerConfig
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from bot.database import BotDatabase
+
+
+class ServerConfig(peewee.Model):
+    serverid = peewee.TextField()
+    name = peewee.TextField()
+    value = peewee.TextField(default='')
+
+    class Meta:
+        from bot.database import BotDatabase
+        database = BotDatabase().db
 
 
 class GuildConfiguration:
@@ -28,27 +42,31 @@ class GuildConfiguration:
         are set to the passed ones.
         """
         guild_id = cls._global_id if guild is None else str(guild.id)
-        if guild_id not in GuildConfiguration._instances:
-            GuildConfiguration._instances[guild_id] = GuildConfiguration(guild, None)
+        if guild_id not in cls._instances:
+            cls._instances[guild_id] = cls(guild, None)
         else:
-            GuildConfiguration._instances[guild_id].set_defaults(defaults)
+            cls._instances[guild_id].set_defaults(defaults)
 
-        return GuildConfiguration._instances[guild_id]
+        return cls._instances[guild_id]
 
-    @staticmethod
-    def get_all(guild_id=None):
+    @classmethod
+    def create_table(cls, db: 'BotDatabase'):
+        db.db.create_tables([ServerConfig], safe=True)
+
+    @classmethod
+    def get_all(cls, guild_id=None):
         """
         Gather all settings stored for a guild as a dict.
         :param guild_id: The guild ID to use the instance for. It defaults to the global configurations.
         """
         if not guild_id:
-            guild_id = GuildConfiguration._global_id
+            guild_id = cls._global_id
 
         config = ServerConfig.select().where(ServerConfig.serverid == guild_id)
         return {i.name: i.value for i in config}
 
-    @staticmethod
-    def get_value(guild_id, name, default=None):
+    @classmethod
+    def get_value(cls, guild_id, name, default=None):
         """
         Retrieve a value for a guild by its ID. If the value does not exist for that guild,
         the default value is returned. The default value is not stored on the database.
@@ -57,7 +75,7 @@ class GuildConfiguration:
         :param default: The default value to use.
         """
         if not guild_id:
-            guild_id = GuildConfiguration._global_id
+            guild_id = cls._global_id
 
         try:
             config = ServerConfig.get(ServerConfig.serverid == guild_id and ServerConfig.name == name)
@@ -65,8 +83,8 @@ class GuildConfiguration:
         except ServerConfig.DoesNotExist:
             return default
 
-    @staticmethod
-    def set_value(guild_id, name, value):
+    @classmethod
+    def set_value(cls, guild_id, name, value):
         """
         Sets a value for a guild's configuration.
         :param guild_id: The guild ID to set the configuration for.

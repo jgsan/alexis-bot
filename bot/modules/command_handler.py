@@ -42,7 +42,7 @@ class StartsWithHandler(Command):
 
     async def on_message(self, message):
         try:
-            mgr_swhandlers = self.bot.manager.swhandlers
+            mgr_swhandlers = self.bot.swhandlers
             swhandlers = []
             config = GuildConfiguration.get_instance(message.guild)
             for swtext in mgr_swhandlers.keys():

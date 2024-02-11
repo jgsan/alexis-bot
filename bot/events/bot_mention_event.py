@@ -30,7 +30,7 @@ class BotMentionEvent(MessageEvent):
         """
         Calls all the registered event handlers, only if permission conditions are met.
         """
-        for cmd in self.bot.manager.mention_handlers:
+        for cmd in self.bot.mention_handlers:
             if cmd.bot_owner_only and not self.bot_owner:
                 continue
             if cmd.owner_only and not (self.owner or self.bot_owner):

@@ -17,7 +17,7 @@ class Modules(Command):
         self.bot_owner_only = True
 
     async def handle(self, cmd):
-        mgr = self.bot.manager
+        mgr = self.bot
         name = '' if cmd.argc == 0 else (cmd.args[0][1:] if cmd.args[0][0] in ['+', '-', '~', '!'] else cmd.args[0])
 
         if name == '':

@@ -4,8 +4,8 @@
 from .bot import AlexisBot
 from .logger import new_logger
 from .events import CommandEvent, MessageEvent, BotMentionEvent
-from .database import BaseModel
 from .lib.language import Language, SingleLanguage
+from .database import BotDatabase
 from .command import Command
 
 bot = AlexisBot()

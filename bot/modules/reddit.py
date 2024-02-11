@@ -4,21 +4,27 @@ import discord
 import peewee
 from discord import Embed
 
-from bot import Command, BaseModel, categories
+from bot import Command, BotDatabase, categories
 from bot.utils import text_cut, auto_int
 from bot.regex import pat_channel, pat_subreddit
 
 
-class RedditLastPost(BaseModel):
+class RedditLastPost(peewee.Model):
     post_id = peewee.CharField()
     subreddit = peewee.CharField()
     timestamp = peewee.IntegerField(default=0)
 
+    class Meta:
+        database = BotDatabase().db
 
-class ChannelFollow(BaseModel):
+
+class ChannelFollow(peewee.Model):
     subreddit = peewee.TextField()
     serverid = peewee.TextField()
     channelid = peewee.TextField()
+
+    class Meta:
+        database = BotDatabase().db
 
 
 class RedditFollow(Command):

@@ -3,17 +3,20 @@ import random
 from discord import Embed
 from datetime import datetime
 
-from bot import Command, BaseModel, categories, settings
+from bot import Command, BotDatabase, categories, settings
 from bot.utils import is_int
 from bot.regex import pat_usertag, pat_snowflake
 
 
-class Ban(BaseModel):
+class Ban(peewee.Model):
     user = peewee.TextField()
     userid = peewee.TextField(default="")
     bans = peewee.BigIntegerField(default=0)
     server = peewee.TextField()
     lastban = peewee.DateTimeField(null=True)
+
+    class Meta:
+        database = BotDatabase().db
 
 
 class BanCmd(Command):

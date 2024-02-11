@@ -22,8 +22,6 @@ def create_logger(
     if log_format is None:
         log_format = default_log_format
 
-    if not isinstance(log_path, Path):
-        log_path = Path(log_path)
 
     formatter = logging.Formatter(log_format, datetime_format)
 
@@ -35,6 +33,9 @@ def create_logger(
         log.addHandler(stdout_logger)
 
     if log_path is not None:
+        if isinstance(log_path, str):
+            log_path = Path(log_path)
+
         if log_path.is_file():
             raise ValueError('Invalid logging file path: is a file, not a directory.')
 

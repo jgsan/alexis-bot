@@ -19,7 +19,7 @@ class CommandConfig(Command):
         if cmd.argc < 2 or cmd.args[0] not in ['enable', 'disable']:
             return await cmd.send_usage()
 
-        if cmd.args[1] not in self.bot.manager:
+        if not self.bot.has_cmd(cmd.args[1]):
             await cmd.answer('$[cmd-not-found]')
             return
 
@@ -28,7 +28,7 @@ class CommandConfig(Command):
             return
 
         avail = serialize_avail(cmd.config.get('cmd_status', ''))
-        cmd_ins = self.bot.manager[cmd.args[1]]
+        cmd_ins = self.bot.get_cmd(cmd.args[1])
         current = avail.get(cmd_ins.name, '+' if cmd_ins.default_enabled else '-')
 
         if cmd.args[0] == 'enable':

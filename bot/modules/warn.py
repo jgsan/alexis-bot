@@ -4,15 +4,18 @@ import discord
 import peewee
 from discord import Embed
 
-from bot import Command, categories, BaseModel
+from bot import Command, BotDatabase, categories
 from bot.utils import is_int
 
 
-class UserWarn(BaseModel):
+class UserWarn(peewee.Model):
     serverid = peewee.TextField()
     userid = peewee.TextField()
     reason = peewee.TextField()
     timestamp = peewee.DateTimeField(default=datetime.now)
+
+    class Meta:
+        database = BotDatabase().db
 
 
 class Warn(Command):
