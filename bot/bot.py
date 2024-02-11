@@ -19,7 +19,7 @@ log = new_logger('Core')
 class AlexisBot(discord.Client):
     __author__ = 'makzk (github.com/jkcgs)'
     __license__ = 'MIT'
-    __version__ = constants.BOT_VERSION
+    __version__ = '2.0.0-dev'
     name = 'AlexisBot'
 
     def __init__(self, **options):
@@ -46,19 +46,6 @@ class AlexisBot(discord.Client):
 
         self.manager = Manager(self)
         self.tree = CommandTree(self)
-
-        # Dinamically create and override event handler methods
-        from bot.constants import EVENT_HANDLERS
-        for method, margs in EVENT_HANDLERS.items():
-            def make_handler(event_name, event_args):
-                async def dispatch(*args):
-                    kwargs = dict(zip(event_args, args))
-                    await self.manager.dispatch(event_name=event_name, **kwargs)
-
-                return dispatch
-
-            event = 'on_' + method
-            setattr(self, event, make_handler(event, margs.copy()))
 
     async def setup_hook(self):
         for guild_id in [i.strip() for i in settings.command_guilds if i.strip()]:
@@ -229,12 +216,7 @@ class AlexisBot(discord.Client):
             del self.deleted_messages_nolog[0]
 
     def command(self, *args, coro=None, **kwargs):
-        def wrapper(f):
-            log.debug('Command loaded: %s', kwargs.get('name', f.__qualname__))
-            async def handler(interaction: discord.Interaction):
-                log.debug('Calling command %s', f)
-                await f(interaction)
-            return self.tree.command(*args, **kwargs)(handler)
+        wrapper = self.manager.command_handler(*args, **kwargs)
 
         if coro:
             wrapper(coro)

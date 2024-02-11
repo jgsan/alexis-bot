@@ -2,8 +2,10 @@ import asyncio
 import importlib
 import inspect
 
+import discord
 import aiohttp
 
+from bot import AlexisBot
 from bot.logger import new_logger
 
 from bot import modules
@@ -14,7 +16,7 @@ log = new_logger('Manager')
 
 
 class Manager:
-    def __init__(self, bot):
+    def __init__(self, bot: AlexisBot):
         self.bot = bot
 
         self.cmds = {}
@@ -26,6 +28,19 @@ class Manager:
 
         headers = {'User-Agent': '{}/{} (https://alexisbot.mak.wtf/)'.format(bot.__class__.name, bot.__class__.__version__)}
         self.http = aiohttp.ClientSession(headers=headers, cookie_jar=aiohttp.CookieJar(unsafe=True))
+
+        # Dinamically create and override bot event handler methods
+        from bot.constants import EVENT_HANDLERS
+        for method, margs in EVENT_HANDLERS.items():
+            def make_handler(event_name, event_args):
+                async def dispatch(*args):
+                    kwargs = dict(zip(event_args, args))
+                    await self.dispatch(event_name=event_name, **kwargs)
+
+                return dispatch
+
+            event = 'on_' + method
+            setattr(bot, event, make_handler(event, margs.copy()))
 
     def load_instances(self):
         """Loads instances for the command classes loaded"""
@@ -143,6 +158,7 @@ class Manager:
                 await task()
             except Exception as e:
                 log.exception(e)
+
     def schedule(self, task, time=0, force=False):
         """
         Adds a task to the loop to be run every *time* seconds.
@@ -268,6 +284,16 @@ class Manager:
             self.tasks[task_name].cancel()
             del self.tasks[task_name]
         log.debug('All tasks cancelled.')
+
+    def command_handler(self, *args, **kwargs):
+        def wrapper(f):
+            log.debug('Command loaded: %s', kwargs.get('name', f.__qualname__))
+            async def handler(interaction: discord.Interaction):
+                log.debug('Calling command %s', f)
+                await f(interaction)
+            return self.bot.tree.command(*args, **kwargs)(handler)
+
+        return wrapper
 
     def __getitem__(self, item):
         return self.get_cmd(item)

@@ -33,7 +33,7 @@ def parse_item_result(cmd_type: str, data: Union[dict, list]) -> str:
     return data
 
 
-async def animal_interaction(cmd_type, interaction):
+async def animal_interaction(cmd_type: str, interaction: discord.Interaction):
     c_url, c_name, _ = cmd_settings[cmd_type]
     async with aiohttp.ClientSession() as session:
         async with session.get(c_url) as r:
