@@ -71,6 +71,14 @@ class AlexisBot(discord.Client):
             setattr(self, event, make_handler(event, margs.copy()))
 
     async def setup_hook(self):
+        from . import commands
+        for module in commands.__all__:
+            importlib.import_module(f'.commands.{module}', package='bot')
+
+        if not self.tree.get_commands():
+            log.debug('No app commands loaded, skipping')
+            return
+
         for guild_id in [i.strip() for i in settings.command_guilds if i.strip()]:
             guild = discord.Object(id=int(guild_id))
             self.tree.copy_global_to(guild=guild)
