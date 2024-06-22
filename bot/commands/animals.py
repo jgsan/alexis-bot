@@ -42,6 +42,8 @@ async def animal_interaction(cmd_type: str, interaction: discord.Interaction):
                 img_url = parse_item_result(cmd_type, data)
                 if cmd_type == 'cat':
                     img_url = f'https://cataas.com/cat/{img_url}'
+                if img_url.endswith('.gifv'):
+                    img_url = img_url[:-4] + 'mp4'
                 embed = discord.Embed(title=f'Aquí tienes tu {c_name}')
                 embed.set_image(url=img_url)
                 await interaction.response.send_message(embed=embed)
@@ -50,6 +52,10 @@ async def animal_interaction(cmd_type: str, interaction: discord.Interaction):
 
 
 for animal in cmd_settings.keys():
-    async def handler(interaction: discord.Interaction):
-        await animal_interaction(animal, interaction)
-    bot.command(name=animal, description=f'Obtener un {cmd_settings[animal][1]} al azar', coro=handler)
+    def make_handler():
+        z_animal = str(animal)
+        async def handler(interaction: discord.Interaction):
+            await animal_interaction(z_animal, interaction)
+        return handler
+
+    bot.command(name=animal, description=f'Obtener un {cmd_settings[animal][1]} al azar', coro=make_handler())
