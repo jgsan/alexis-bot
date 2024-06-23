@@ -54,9 +54,6 @@ class AlexisBot(discord.Client):
         self.cmd_instances = []
         self.mention_handlers = []
 
-        #headers = {'User-Agent': '{}/{} (https://alexisbot.mak.wtf/)'.format(self.__class__.name, self.__class__.__version__)}
-        #self.http = aiohttp.ClientSession(headers=headers, cookie_jar=aiohttp.CookieJar(unsafe=True))
-
         # Dinamically create and override bot event handler methods
         from bot.constants import EVENT_HANDLERS
         for method, margs in EVENT_HANDLERS.items():
