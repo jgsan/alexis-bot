@@ -6,7 +6,7 @@ from .. import bot
 
 
 @bot.command(description='Muestra un avatar')
-async def avatar(interaction: discord.Interaction, member: Optional[discord.Member] = None):
+async def avatar(interaction: discord.Interaction, member: Optional[discord.Member | discord.User] = None):
     if member is None:
         member = interaction.user
 
